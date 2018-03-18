@@ -32,6 +32,10 @@ class AbstractEntity {
     clearNextSelection() {
         this.nextSelection = undefined;
     }
+
+    serialize() { 
+        return JSON.stringify(this);
+    }
 }
 
 class Location extends AbstractEntity {

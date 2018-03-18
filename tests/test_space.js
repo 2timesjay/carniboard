@@ -76,3 +76,11 @@ test('getPath', function (t) {
         space.getPath(locations[0][0], locations[5][5]).length
     )
 });
+
+test('', function (t) {
+    t.plan(1);
+    t.deepEquals(
+        [],
+        space.getPath(locations[2][3], locations[2][3])
+    )
+});
