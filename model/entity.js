@@ -1,3 +1,18 @@
+Array.prototype.flatMap = function (lambda) {
+    return Array.prototype.concat.apply([], this.map(lambda));
+}
+
+difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)))
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
 class AbstractEntity {
     constructor() {
         this.clearNextSelection();
@@ -26,7 +41,6 @@ class Location extends AbstractEntity {
         this.x = x;
         this.y = y;
         this.traversable = traversable;
-        this.display = new LocationDisplay(this);
     }
 
     regenerateNextSelection(contextSpace) {
@@ -39,7 +53,6 @@ class Confirmation {
         this.basis = basis;
         this.message = message || "Missing message";
         this.isEnd = isEnd || false;
-        this.display = new ConfirmationDisplay(this);
     }
 
     getNextSelection(contextSpace) {
@@ -58,7 +71,6 @@ class BaseUnit extends AbstractEntity { // isa Entity
         this.name = name;
         this.loc = loc;
         this.team = team;
-        this.display = new UnitDisplay(this);
         this.actionClasses = actionClasses
     }
 
@@ -89,7 +101,6 @@ class Action extends AbstractEntity {
         this.nextSelFn = nextSelFn;
         this.digestFn = digestFn;
         this.index = index;
-        this.display = new ActionDisplay(this);
     }
 
     isHit(mousePos) {
@@ -174,7 +185,6 @@ class Path {
         this.destination = destination;
         this.locations = contextSpace.getPath(origin, destination);
         this.clearNextSelection();
-        this.display = new PathDisplay(this);
         this.remaining_range = total_range - this.locations.length;
     }
 
@@ -229,17 +239,6 @@ class TicTacToeControlQueue extends BaseControlQueue {
     }
 }
 
-class TicTacToeControlQueue extends BaseControlQueue {
-    constructor(contextSpace) {
-        super()
-        // this.nextSelection = contextSpace.locations.flatMap(l => l);
-    }
-
-    calculateNext(contextSpace) {
-        return Array.from(difference(new Set(contextSpace.locations.flatMap(l => l)), new Set(contextSpace.units.map(u => u.loc))));
-    }
-}
-
 class ControlQueue extends BaseControlQueue {
     constructor(contextSpace) {
         super()
@@ -250,3 +249,6 @@ class ControlQueue extends BaseControlQueue {
         return contextSpace.units.filter(u => u.team == contextSpace.team);
     }
 }
+
+module.exports.Location = Location;
+module.exports.Unit = Unit;

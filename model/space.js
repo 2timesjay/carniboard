@@ -1,3 +1,16 @@
+function argmin(arr) {
+    let min = Math.min(...arr);
+    return arr.indexOf(min);
+}
+
+Array.prototype.flatMap = function (lambda) {
+    return Array.prototype.concat.apply([], this.map(lambda));
+}
+
+difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)))
+
+union = (set1, set2) => new Set([...set1, ...set2])
+
 class Space {
     constructor(locations, units, k) {
         this.k = k;
@@ -98,3 +111,5 @@ class Space {
         return triggeredEffects;
     }
 }
+
+module.exports.Space = Space;
