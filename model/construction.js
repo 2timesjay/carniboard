@@ -1,3 +1,17 @@
+entity = require('../model/entity')
+Unit = entity.Unit
+Location = entity.Location
+TicTacToeControlQueue = entity.TicTacToeControlQueue
+ControlQueue = entity.ControlQueue
+Confirmation = entity.Confirmation
+
+effect = require('../model/effect')
+AddUnitEffect = effect.AddUnitEffect
+EndTurnEffect = effect.EndTurnEffect
+
+Space = require('../model/space').Space
+State = require('../model/state').State
+
 makeTicTacToe = function () {
     let locations = [
         [1, 1, 1],
@@ -47,4 +61,8 @@ makeTicTacToe = function () {
     stack = [new TicTacToeControlQueue(space)];
     state = new State(space, stack, gameOverConfirmation, digestFnGetter);
     return state;
+}
+
+module.exports = {
+    makeTicTacToe: makeTicTacToe
 }

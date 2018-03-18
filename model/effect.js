@@ -87,3 +87,8 @@ class SetObserverEffect extends Effect {
         return this;
     }
 }
+
+module.exports = {
+    AddUnitEffect: AddUnitEffect,
+    EndTurnEffect: EndTurnEffect
+}

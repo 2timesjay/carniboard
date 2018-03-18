@@ -112,4 +112,6 @@ class Space {
     }
 }
 
-module.exports.Space = Space;
+module.exports = {
+    Space: Space
+}

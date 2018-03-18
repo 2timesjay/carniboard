@@ -9,3 +9,7 @@ class State {
         this.inputStack = [];
     }
 }
+
+module.exports = {
+    State: State
+}

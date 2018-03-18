@@ -177,15 +177,10 @@ class UnitDisplay extends AbstractDisplay {
     }
 
     isHit(mousePos) {
-        if (mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.width) {
-            if (mousePos.y >= this.yOffset && mousePos.y < this.yOffset + this.height) {
-                return true;
-            }
-        } else {
-            return false;
-        }
+        var inXBounds = mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.size;
+        var inYBounds = mousePos.y >= this.yOffset - this.size && mousePos.y < this.yOffset;
+        return inXBounds && inYBounds;
     }
-
 }
 
 class ActionDisplay extends AbstractDisplay {
@@ -222,13 +217,9 @@ class ActionDisplay extends AbstractDisplay {
     }
 
     isHit(mousePos) {
-        if (mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.size) {
-            if (mousePos.y >= this.yOffset - this.size && mousePos.y < this.yOffset) {
-                return true;
-            }
-        } else {
-            return false;
-        }
+        var inXBounds = mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.size;
+        var inYBounds = mousePos.y >= this.yOffset - this.size && mousePos.y < this.yOffset;
+        return inXBounds && inYBounds;
     }
 }
 

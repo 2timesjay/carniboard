@@ -254,5 +254,10 @@ class ControlQueue extends BaseControlQueue {
     }
 }
 
-module.exports.Location = Location;
-module.exports.Unit = Unit;
+module.exports = {
+    Unit: Unit,
+    Location: Location,
+    TicTacToeControlQueue: TicTacToeControlQueue,
+    ControlQueue: ControlQueue,
+    Confirmation: Confirmation,
+}
