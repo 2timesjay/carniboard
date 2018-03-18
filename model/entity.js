@@ -1,0 +1,252 @@
+class AbstractEntity {
+    constructor() {
+        this.clearNextSelection();
+    }
+
+    getNextSelection(contextSpace) { // TODO: Make nextSelection explicitly caching, not dangerous state
+        if (this.nextSelection == undefined) {
+            this.regenerateNextSelection(contextSpace)
+        };
+        return this.nextSelection;
+    }
+
+    regenerateNextSelection(contextSpace) {
+        this.nextSelection = [];
+    }
+
+    clearNextSelection() {
+        this.nextSelection = undefined;
+    }
+}
+
+class Location extends AbstractEntity {
+    constructor(x, y, traversable) {
+        super();
+        this.color = getRandomColor();
+        this.x = x;
+        this.y = y;
+        this.traversable = traversable;
+        this.display = new LocationDisplay(this);
+    }
+
+    regenerateNextSelection(contextSpace) {
+        this.nextSelection = [new Confirmation(this)];
+    }
+}
+
+class Confirmation {
+    constructor(basis, message, isEnd) { // (basis: Selectable) : Confirmation
+        this.basis = basis;
+        this.message = message || "Missing message";
+        this.isEnd = isEnd || false;
+        this.display = new ConfirmationDisplay(this);
+    }
+
+    getNextSelection(contextSpace) {
+        return [];
+    }
+}
+
+class BaseUnit extends AbstractEntity { // isa Entity
+    constructor(stats, name, loc, team, actionClasses) {
+        super();
+        this.range = stats.range || 3;
+        this.arange = stats.arange || 3;
+        this.maxhp = stats.maxhp || 3;
+        this.hp = this.maxhp;
+        this.dmg = stats.dmg || 1
+        this.name = name;
+        this.loc = loc;
+        this.team = team;
+        this.display = new UnitDisplay(this);
+        this.actionClasses = actionClasses
+    }
+
+    isAlive() {
+        return this.hp > 0;
+    }
+
+    regenerateNextSelection(contextSpace) {
+        if (this.isAlive()) {
+            this.nextSelection = this.actionClasses.map((a, i) => new a(i, this));
+        } else {
+            this.nextSelection = [];
+        }
+    }
+}
+
+class Unit extends BaseUnit { // isa Entity
+    constructor(name, loc, team, stats) {
+        super(stats || {}, name, loc, team, [MoveAction, AttackAction, ReadyCounterAction]);
+    }
+}
+
+class Action extends AbstractEntity {
+    constructor(actionType, text, nextSelFn, digestFn, index) { // (origin: Location, destination: Location) : Path
+        super();
+        this.actionType = actionType;
+        this.text = text;
+        this.nextSelFn = nextSelFn;
+        this.digestFn = digestFn;
+        this.index = index;
+        this.display = new ActionDisplay(this);
+    }
+
+    isHit(mousePos) {
+        if (mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.width) {
+            if (mousePos.y >= this.yOffset && mousePos.y < this.yOffset + this.height) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    getNextSelection(contextSpace) {
+        if (this.nextSelection == undefined) {
+            this.regenerateNextSelection(contextSpace)
+        };
+        return this.nextSelection;
+    }
+
+    regenerateNextSelection(contextSpace) {
+        return this.nextSelFn;
+    }
+
+    clearNextSelection() {
+        this.nextSelection = undefined;
+    }
+}
+
+class MoveAction extends Action {
+    constructor(index, contextUnit) {
+        const digestFn = function (stack) {
+            let u = stack[1];
+            let paths = stack.slice(2).filter(p => (p.constructor.name == "Path"));
+            return paths.map(p => new MoveEffect(u, p.destination)).concat([new EndTurnEffect()]);
+        }
+        super("MOVE", "M", () => { }, digestFn, index); //nextSelFn, digestFn
+        this.unit = contextUnit;
+    }
+
+    regenerateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
+        console.log("REGENERATE MOVE NEXT_SEL");
+        this.nextSelection = contextSpace.getReachable(this.unit.loc, this.unit.range).map(dest => new Path(this.unit.loc, dest, contextSpace, this.unit.range));
+    }
+}
+
+class AttackAction extends Action {
+    constructor(index, contextUnit) {
+        const digestFn = function (stack) {
+            let u = stack[1];
+            let loc = stack[3];
+            return [new DamageEffect(u, loc), new EndTurnEffect()];
+        }
+        super("ATTACK", "A", () => { }, digestFn, index);
+        this.unit = contextUnit;
+    }
+
+    regenerateNextSelection(contextSpace) { // (contextSpace: Space): Location[] 
+        console.log("REGENERATE ATTACK NEXT_SEL");
+        this.nextSelection = contextSpace.units
+            .filter(u => contextSpace.getDistanceDirect(u.loc, this.unit.loc) < this.unit.arange)
+            .map(u => u.loc);
+    }
+}
+
+class ReadyCounterAction extends Action {
+    constructor(index, contextUnit) {
+        const digestFn = function (stack) {
+            return [new SetObserverEffect(stack), new EndTurnEffect()];
+        }
+        super("COUNTER", "C", () => { }, digestFn, index);
+        this.unit = contextUnit;
+    }
+
+    regenerateNextSelection(contextSpace) { // (contextSpace: Space): Confirmation[]
+        this.nextSelection = [new Confirmation(this)];
+    }
+}
+
+class Path {
+    constructor(origin, destination, contextSpace, total_range) { // (origin: Location, destination: Location) : Path
+        this.origin = origin;
+        this.destination = destination;
+        this.locations = contextSpace.getPath(origin, destination);
+        this.clearNextSelection();
+        this.display = new PathDisplay(this);
+        this.remaining_range = total_range - this.locations.length;
+    }
+
+    getNextSelection(contextSpace) {
+        if (this.nextSelection == undefined) {
+            this.regenerateNextSelection(contextSpace)
+        };
+        return this.nextSelection;
+    }
+
+    regenerateNextSelection(contextSpace) { // (contextSpace: Space): Location[] 
+        if (this.remaining_range == 0 || this.origin == this.destination) {
+            this.nextSelection = [new Confirmation(this)];
+        } else {
+            this.nextSelection = contextSpace.getReachable(this.destination, this.remaining_range).map(next_dest => new Path(this.destination, next_dest, contextSpace, this.remaining_range));
+        }
+    }
+
+    clearNextSelection() {
+        this.nextSelection = undefined;
+    }
+}
+
+class BaseControlQueue extends AbstractEntity {
+    constructor(contextSpace) {
+        super()
+    }
+
+    checkEnd(contextSpace) {
+        let end = contextSpace.gameOverConfirmation();
+        if (end.length > 0) { console.log("GAME OVER"); return end; }
+        else { return undefined; }
+    }
+
+    calculateNext(contextSpace) {
+        return [];
+    }
+
+    getNextSelection(contextSpace) {
+        return this.checkEnd(contextSpace) || this.calculateNext(contextSpace);
+    }
+}
+
+class TicTacToeControlQueue extends BaseControlQueue {
+    constructor(contextSpace) {
+        super()
+        // this.nextSelection = contextSpace.locations.flatMap(l => l);
+    }
+
+    calculateNext(contextSpace) {
+        return Array.from(difference(new Set(contextSpace.locations.flatMap(l => l)), new Set(contextSpace.units.map(u => u.loc))));
+    }
+}
+
+class TicTacToeControlQueue extends BaseControlQueue {
+    constructor(contextSpace) {
+        super()
+        // this.nextSelection = contextSpace.locations.flatMap(l => l);
+    }
+
+    calculateNext(contextSpace) {
+        return Array.from(difference(new Set(contextSpace.locations.flatMap(l => l)), new Set(contextSpace.units.map(u => u.loc))));
+    }
+}
+
+class ControlQueue extends BaseControlQueue {
+    constructor(contextSpace) {
+        super()
+        // this.nextSelection = contextSpace.units;
+    }
+
+    calculateNext(contextSpace) {
+        return contextSpace.units.filter(u => u.team == contextSpace.team);
+    }
+}
