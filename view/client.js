@@ -1,7 +1,31 @@
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
-var my_gradient = ctx.createLinearGradient(0, 0, 0, 170);
-my_gradient.addColorStop(0, "black");
-my_gradient.addColorStop(1, "white");
-ctx.fillStyle = my_gradient;
-ctx.fillRect(20, 20, 150, 100);
+makeTicTacToe = require('../model/construction').makeTicTacToe;
+draw = require('../view/draw');
+redraw = draw.redraw;
+addListeners = draw.addListeners;
+checkConfirmation = draw.checkConfirmation;
+
+const k = 3;
+const size = 100;
+const canvas = document.createElement('canvas');
+canvas.width = k * 100;
+canvas.height = k * size;
+const context = canvas.getContext("2d");
+document.body.appendChild(canvas);
+
+var state = makeTicTacToe();
+var triggerList = [];
+
+var loop = function() {
+    redraw(context, state, triggerList, size);
+    addListeners(context, triggerList);
+    checkConfirmation(state); // TODO: Timeline
+}
+loop();
+canvas.addEventListener(
+    'mousemove', 
+    () => loop()
+);
+canvas.addEventListener(
+    'click',
+    () => loop()
+);

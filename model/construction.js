@@ -25,7 +25,7 @@ makeTicTacToe = function () {
     let space = new Space(locations, units, 3);
     space.k = 3;
 
-    gameOverConfirmation = function (spc) {
+    gameEndConfirmation = function (spc) {
         let t0 = spc.units.filter(u => u.team == 0);
         let t1 = spc.units.filter(u => u.team == 1);
         function threeInARow(team) {
@@ -59,7 +59,8 @@ makeTicTacToe = function () {
         }; // TODO: Add unit
     }
     stack = [new TicTacToeControlQueue(space)];
-    state = new State(space, stack, gameOverConfirmation, digestFnGetter);
+    state = new State(space, stack, gameEndConfirmation, digestFnGetter);
+    space.state = state;
     return state;
 }
 

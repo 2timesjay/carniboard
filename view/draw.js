@@ -1,5 +1,24 @@
-var redraw = function(context, space, triggerList) {
-    let stack = space.inputStack;
+display = require('../view/display')
+
+
+var addDisplay = function(entity){
+    var className = entity.constructor.name;
+    var displayConstructor = display[className];
+    if (displayConstructor == undefined){ return undefined; }
+    else { return new displayConstructor(entity); }
+}
+
+var tryAttachDisplay = function(entity) {
+    if (entity.display != undefined) { return; }
+    else {
+        var display = addDisplay(entity);
+        entity.display = display;
+    }
+}
+
+var redraw = function(context, state, triggerList, size) {
+    let space = state.space;
+    let stack = state.stack;
     let k = space.k;
     context.clearRect(0, 0, k * size, k * size);
     const canvas = context.canvas;
@@ -11,12 +30,17 @@ var redraw = function(context, space, triggerList) {
             let row = locs[x];
             for (let y = 0; y < row.length; y++) {
                 let loc = row[y];
+                tryAttachDisplay(loc);
                 loc.display.passiveDisplay(context);
             }
         }
-        space.units.forEach(u => u.display.passiveDisplay(context));
+        space.units.forEach(u => {
+            tryAttachDisplay(u); 
+            u.display.passiveDisplay(context); 
+        });
     }
     function showElement(elem, listen_elem, show_children, listen_children) {
+        tryAttachDisplay(elem);
         if (elem.display != undefined) {
             elem.display.display(context);
             if (listen_elem) {
@@ -28,6 +52,7 @@ var redraw = function(context, space, triggerList) {
             let selection = elem.getNextSelection(space);
             for (let i = 0; i < selection.length; i++) {
                 let s = selection[i];
+                tryAttachDisplay(s);
                 s.display.display(context);
                 if (listen_children) {
                     triggerList.unshift(s.display.previewListener(canvas));
@@ -53,9 +78,10 @@ var redraw = function(context, space, triggerList) {
     showInputStack(stack);
 }
 
-var checkConfirmation = function (space, timelineView) {
-    let stack = space.inputStack;
-    let digestFnGetter = space.digestFnGetter;
+var checkConfirmation = function (state, timelineView) {
+    let space = state.space
+    let stack = state.stack;
+    let digestFnGetter = state.digestFnGetter;
     let topSel = stack[stack.length - 1].getNextSelection(space);
     if (topSel.length > 0 && topSel[0].constructor.name == "Confirmation" && !topSel[0].isEnd) {
         console.log("CONFIRMED: ", stack);
@@ -66,6 +92,7 @@ var checkConfirmation = function (space, timelineView) {
             top.display._deselect(stack);
         }
         let executed_effects = effects.map(e => e.execute(space)); // TODO: Ensure counters pushed to timeline properly
+        console.log("Post Execution: ", state);
         if (timelineView != undefined) {
             timelineView.push(executed_effects); // INTERFACE
             console.log("Timeline: ", timelineView);
@@ -78,11 +105,11 @@ var checkConfirmation = function (space, timelineView) {
 var addListeners = function(context, triggerList, eventSignalView) {
     context.canvas.onmousemove = function (event) {
         triggerList.map(t => t(event))
-        eventSignalView.trigger();
+        // eventSignalView.trigger();
     }
     context.canvas.onclick = function (event) {
         triggerList.forEach(t => t(event));
-        eventSignalView.trigger();
+        // eventSignalView.trigger();
     }
 }
 
@@ -106,3 +133,9 @@ var addListeners = function(context, triggerList, eventSignalView) {
 //     addListeners(g_context, g_triggerList, g_eventSignalView);
 //     viewof tac_renderCompleteSignal.trigger();
 // }
+
+module.exports = {
+    redraw: redraw,
+    addListeners: addListeners,
+    checkConfirmation: checkConfirmation
+}

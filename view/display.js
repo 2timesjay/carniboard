@@ -1,3 +1,43 @@
+const size = 100;
+
+function getMousePos(canvasDom, mouseEvent) {
+    var rect = canvasDom.getBoundingClientRect();
+    return {
+        x: mouseEvent.clientX - rect.left,
+        y: mouseEvent.clientY - rect.top
+    };
+}
+function makeRect(x, y, context, size, clr, lfa) {
+    const alpha = lfa == undefined ? 1.0 : lfa;
+    const color = clr == undefined ? "#000000" : clr;
+    context.globalAlpha = alpha;
+    context.beginPath();
+    context.rect(x, y, size, size);
+    context.fillStyle = color;
+    context.fill();
+    context.lineWidth = 4;
+    context.strokeStyle = 'black';
+    context.stroke();
+    context.globalAlpha = 1.0;
+}
+
+function makeCircle(x, y, context, size, clr, lfa) {
+    const alpha = lfa == undefined ? 1.0 : lfa;
+    const color = clr == undefined ? "#000000" : clr;
+    var centerX = x;
+    var centerY = y;
+    var radius = size;
+
+    context.globalAlpha = alpha;
+    context.beginPath();
+    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+    context.fillStyle = color;
+    context.fill();
+    context.lineWidth = 5;
+    // context.strokeStyle = color;
+    // context.stroke();
+    context.globalAlpha = 1.0;
+}
 class AbstractDisplay {
     constructor(entity) {
         this.entity = entity;
@@ -327,4 +367,12 @@ class ConfirmationDisplay extends AbstractDisplay {
     isHit(mousePos) {
     }
 
+}
+
+module.exports = {
+    Unit: UnitDisplay,
+    Location: LocationDisplay,
+    Path: PathDisplay,
+    Action: ActionDisplay,
+    Confirmation: ConfirmationDisplay
 }

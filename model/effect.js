@@ -16,7 +16,7 @@ class AddUnitEffect extends Effect {
     }
 
     execute(contextSpace) {
-        contextSpace.units.push(new Unit("", contextSpace.getLocation(this.destination), contextSpace.team));
+        contextSpace.units.push(new Unit("", contextSpace.getLocation(this.destination), contextSpace.state.team));
         return this;
     }
 }
@@ -27,7 +27,7 @@ class EndTurnEffect extends Effect {
     }
 
     execute(contextSpace) {
-        contextSpace.advance();
+        contextSpace.state.advance();
         return this;
     }
 }

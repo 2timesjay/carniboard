@@ -218,7 +218,8 @@ class BaseControlQueue extends AbstractEntity {
     }
 
     checkEnd(contextSpace) {
-        let end = contextSpace.gameOverConfirmation();
+        state = contextSpace.state
+        let end = state.gameEndFn(contextSpace);
         if (end.length > 0) { console.log("GAME OVER"); return end; }
         else { return undefined; }
     }

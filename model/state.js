@@ -8,6 +8,10 @@ class State {
         this.team = 0;
         this.inputStack = [];
     }
+
+    advance() {
+        this.team = 1 - this.team;
+    }
 }
 
 module.exports = {

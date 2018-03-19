@@ -18,10 +18,6 @@ class Space {
         this.units = units;
     }
 
-    advance() {
-        this.team = 1 - this.team;
-    }
-
     getAdjacent(loc) { // (loc: Location): Location[]
         function isValidLoc(adj) { return adj != undefined && adj.traversable; }
         const x = loc.x;
