@@ -4,21 +4,30 @@ redraw = draw.redraw;
 addListeners = draw.addListeners;
 checkConfirmation = draw.checkConfirmation;
 
+timeline = require("../view/timeline");
+makeTimeline = timeline.makeTimeline;
+ListView = timeline.ListView;
+createTimelineController = timeline.createTimelineController;
+
 const k = 3;
 const size = 100;
-const canvas = document.createElement('canvas');
-canvas.width = k * 100;
-canvas.height = k * size;
+const canvas = draw.makeCanvas(k * 100, k * size, true);
 const context = canvas.getContext("2d");
-document.body.appendChild(canvas);
 
 var state = makeTicTacToe();
 var triggerList = [];
 
+var tl = new ListView([]);
+var tlc = createTimelineController(tl, ()=>{});
+var tl_images = [];
+var tl_canvas = draw.makeCanvas(k*size/2, k*size/2, true);
+var tl_render_fn = () => makeTimeline(context, tl, tl_images, tl_canvas);
+
 var loop = function() {
     redraw(context, state, triggerList, size);
     addListeners(context, triggerList);
-    checkConfirmation(state); // TODO: Timeline
+    checkConfirmation(state, tl); // TODO: Timeline
+    tl_render_fn();
 }
 loop();
 canvas.addEventListener(

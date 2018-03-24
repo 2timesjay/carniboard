@@ -1,6 +1,15 @@
 display = require('../view/display')
 
-
+var makeCanvas = function (width, height, attach) {
+    console.log("make canvas");
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute("width", width);
+    canvas.setAttribute("height", height);
+    if (attach) {
+        document.body.appendChild(canvas);
+    }
+    return canvas;
+}
 var addDisplay = function(entity){
     var className = entity.constructor.name;
     var displayConstructor = display[className];
@@ -137,5 +146,6 @@ var addListeners = function(context, triggerList, eventSignalView) {
 module.exports = {
     redraw: redraw,
     addListeners: addListeners,
-    checkConfirmation: checkConfirmation
+    checkConfirmation: checkConfirmation,
+    makeCanvas: makeCanvas
 }
