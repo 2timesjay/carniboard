@@ -1,3 +1,7 @@
+Array.prototype.flatMap = function (lambda) {
+    return Array.prototype.concat.apply([], this.map(lambda));
+}
+
 makeTicTacToe = require('../model/construction').makeTicTacToe;
 draw = require('../view/draw');
 redraw = draw.redraw;
@@ -18,7 +22,14 @@ var state = makeTicTacToe();
 var triggerList = [];
 
 var tl = new ListView([]);
-var tlc = createTimelineController(tl, ()=>{});
+var tlc = createTimelineController(
+    tl, 
+    ()=> { 
+        state = makeTicTacToe();
+        console.log("REAPPLY TIMELINE");
+        tl.value.flatMap(e => e).map(e => e.execute(state.space));
+    }
+);
 var tl_images = [];
 var tl_canvas = draw.makeCanvas(k*size/2, k*size/2, true);
 var tl_render_fn = () => makeTimeline(context, tl, tl_images, tl_canvas);

@@ -8,7 +8,6 @@ makeTimeline = function (originalContext, timeline, timelineImages, canvas) {
     var width = originalContext.canvas.width;
     var height = originalContext.canvas.height;
     var scale = Math.min(0.25, 1.0 / tlen);
-    console.log(timeline);
     function drawContents(ctx, scale) {
         ctx.scale(scale, scale);
         let temp = timelineImages
