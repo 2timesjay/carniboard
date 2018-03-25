@@ -1,8 +1,11 @@
+/* Imports */
+
 Array.prototype.flatMap = function (lambda) {
     return Array.prototype.concat.apply([], this.map(lambda));
 }
 
 makeTicTacToe = require('../model/construction').makeTicTacToe;
+makeBasicTactics = require('../model/construction').makeBasicTactics;
 draw = require('../view/draw');
 redraw = draw.redraw;
 addListeners = draw.addListeners;
@@ -10,22 +13,32 @@ checkConfirmation = draw.checkConfirmation;
 
 timeline = require("../view/timeline");
 makeTimeline = timeline.makeTimeline;
-ListView = timeline.ListView;
 createTimelineController = timeline.createTimelineController;
 
-const k = 3;
+wiring = require("../utilities/wiring.js")
+ListView = wiring.ListView;
+
+/* Tic Tac Toe specific setup */
+// const k = 3;
+// const size = 100;
+// const buildState = makeTicTacToe;
+
+// /* Basic Tactics specific setup */
+const k = 8;
 const size = 100;
+const buildState = makeBasicTactics;
+
+/* Generic setup */
 const canvas = draw.makeCanvas(k * 100, k * size, true);
 const context = canvas.getContext("2d");
-
-var state = makeTicTacToe();
+var state = buildState();
 var triggerList = [];
 
 var tl = new ListView([]);
 var tlc = createTimelineController(
     tl, 
     ()=> { 
-        state = makeTicTacToe();
+        state = buildState();
         console.log("REAPPLY TIMELINE");
         tl.value.flatMap(e => e).map(e => e.execute(state.space));
     }

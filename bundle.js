@@ -3,7 +3,7 @@ entity = require('../model/entity')
 Unit = entity.Unit
 Location = entity.Location
 TicTacToeControlQueue = entity.TicTacToeControlQueue
-ControlQueue = entity.ControlQueue
+BasicTacticsControlQueue = entity.BasicTacticsControlQueue
 Confirmation = entity.Confirmation
 
 effect = require('../model/effect')
@@ -65,8 +65,52 @@ makeTicTacToe = function () {
     return state;
 }
 
+makeBasicTactics = function() {
+    let locations = [
+        [1, 0, 1, 1, 1, 0, 0, 0],
+        [1, 1, 0, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 0, 0, 1, 1],
+        [0, 1, 1, 1, 0, 0, 0, 1],
+        [1, 1, 0, 1, 1, 0, 1, 1],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+    ].map(
+        (row, y) => row.map(
+            (loc, x) => new Location(x, y, loc)
+        ));
+    let units = [
+        { 'range': 3, 'loc': [0, 0], 'name': 'anxia', 'team': 0 },
+        { 'range': 3, 'loc': [3, 1], 'name': 'boxer', 'team': 1 },
+        { 'range': 3, 'loc': [3, 2], 'name': 'caleb', 'team': 0 },
+        { 'range': 4, 'loc': [5, 5], 'name': 'deepa', 'team': 1 }
+    ].map(u => new Unit(u.name, locations[u.loc[1]][u.loc[0]], u.team, u));
+    console.log("RESET SPACE");
+    let space = new Space(locations, units, 8);
+    gameEndConfirmation = function (spc) {
+        let teamDead = function(team) {
+            let aliveUnits = spc.units.filter(u => u.team == team && u.isAlive());
+            return aliveUnits.length == 0;
+        };
+        if (teamDead(0) || teamDead(1)) {
+            return [new Confirmation(undefined, "GAME OVER", true)];
+        } else {
+            return [];
+        };
+    };
+    digestFnGetter = function (stack) { // stack => (stack => Effect[])
+        let action = stack[2];
+        return action.digestFn;
+    };
+    stack = [new BasicTacticsControlQueue(space)];
+    state = new State(space, stack, gameEndConfirmation, digestFnGetter);
+    space.state = state;
+    return state;
+}
+
 module.exports = {
-    makeTicTacToe: makeTicTacToe
+    makeTicTacToe: makeTicTacToe,
+    makeBasicTactics: makeBasicTactics
 }
 },{"../model/effect":2,"../model/entity":3,"../model/space":4,"../model/state":5}],2:[function(require,module,exports){
 class Effect {
@@ -410,14 +454,13 @@ class TicTacToeControlQueue extends BaseControlQueue {
     }
 }
 
-class ControlQueue extends BaseControlQueue {
+class BasicTacticsControlQueue extends BaseControlQueue {
     constructor(contextSpace) {
         super()
-        // this.nextSelection = contextSpace.units;
     }
 
     calculateNext(contextSpace) {
-        return contextSpace.units.filter(u => u.team == contextSpace.team);
+        return contextSpace.units.filter(u => u.team == contextSpace.state.team);
     }
 }
 
@@ -425,7 +468,7 @@ module.exports = {
     Unit: Unit,
     Location: Location,
     TicTacToeControlQueue: TicTacToeControlQueue,
-    ControlQueue: ControlQueue,
+    BasicTacticsControlQueue: BasicTacticsControlQueue,
     Confirmation: Confirmation,
 }
 },{}],4:[function(require,module,exports){
@@ -563,11 +606,110 @@ module.exports = {
     State: State
 }
 },{}],6:[function(require,module,exports){
+class ListView {
+    constructor(initial_list) {
+        this._listeners = [];
+        this._value = initial_list;
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set value(value) {
+        this._value = value;
+        this.dispatchEvent({ type: "input", value });
+    }
+
+    get length() {
+        return this._value.length;
+    }
+
+    push(elem) {
+        this._value.push(elem);
+        this.basicDispatch();
+    }
+
+    extend(li) {
+        this._value = this._value.concat(li);
+        this.basicDispatch();
+    }
+
+    pop() {
+        this._value.pop();
+        this.basicDispatch();
+    }
+
+    splice(i) {
+        this._value.splice(i);
+        this.basicDispatch();
+    }
+
+    first() {
+        return this._value[0];
+    }
+
+    last() {
+        return this._value[this._value.length - 1];
+    }
+
+    basicDispatch() {
+        const _value = this._value;
+        this.dispatchEvent({ type: "input", _value });
+    }
+
+    addEventListener(type, listener) {
+        if (type != "input" || this._listeners.includes(listener)) return;
+        this._listeners = [listener].concat(this._listeners);
+    }
+
+    removeEventListener(type, listener) {
+        if (type != "input") return;
+        this._listeners = this._listeners.filter(l => l !== listener);
+    }
+
+    dispatchEvent(event) {
+        const p = Promise.resolve(event);
+        this._listeners.forEach(l => p.then(l));
+    }
+
+}
+
+class Signal {
+    constructor() {
+        this._listeners = [];
+    }
+
+    trigger() {
+        this.dispatchEvent({ type: "input" });
+    }
+    addEventListener(type, listener) {
+        if (type != "input" || this._listeners.includes(listener)) return;
+        this._listeners = [listener].concat(this._listeners);
+    }
+    removeEventListener(type, listener) {
+        if (type != "input") return;
+        this._listeners = this._listeners.filter(l => l !== listener);
+    }
+    dispatchEvent(event) {
+        const p = Promise.resolve(event);
+        this._listeners.forEach(l => p.then(l));
+    }
+}
+
+module.exports = {
+    Signal: Signal,
+    ListView: ListView
+}
+},{}],7:[function(require,module,exports){
+/* Imports */
+
 Array.prototype.flatMap = function (lambda) {
     return Array.prototype.concat.apply([], this.map(lambda));
 }
 
 makeTicTacToe = require('../model/construction').makeTicTacToe;
+makeBasicTactics = require('../model/construction').makeBasicTactics;
 draw = require('../view/draw');
 redraw = draw.redraw;
 addListeners = draw.addListeners;
@@ -575,22 +717,32 @@ checkConfirmation = draw.checkConfirmation;
 
 timeline = require("../view/timeline");
 makeTimeline = timeline.makeTimeline;
-ListView = timeline.ListView;
 createTimelineController = timeline.createTimelineController;
 
-const k = 3;
+wiring = require("../utilities/wiring.js")
+ListView = wiring.ListView;
+
+/* Tic Tac Toe specific setup */
+// const k = 3;
+// const size = 100;
+// const buildState = makeTicTacToe;
+
+// /* Basic Tactics specific setup */
+const k = 8;
 const size = 100;
+const buildState = makeBasicTactics;
+
+/* Generic setup */
 const canvas = draw.makeCanvas(k * 100, k * size, true);
 const context = canvas.getContext("2d");
-
-var state = makeTicTacToe();
+var state = buildState();
 var triggerList = [];
 
 var tl = new ListView([]);
 var tlc = createTimelineController(
     tl, 
     ()=> { 
-        state = makeTicTacToe();
+        state = buildState();
         console.log("REAPPLY TIMELINE");
         tl.value.flatMap(e => e).map(e => e.execute(state.space));
     }
@@ -615,7 +767,7 @@ canvas.addEventListener(
     () => loop()
 );
 
-},{"../model/construction":1,"../view/draw":8,"../view/timeline":9}],7:[function(require,module,exports){
+},{"../model/construction":1,"../utilities/wiring.js":6,"../view/draw":9,"../view/timeline":10}],8:[function(require,module,exports){
 const size = 100;
 
 function getMousePos(canvasDom, mouseEvent) {
@@ -994,7 +1146,7 @@ module.exports = {
     Action: ActionDisplay,
     Confirmation: ConfirmationDisplay
 }
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 display = require('../view/display')
 
 var makeCanvas = function (width, height, attach) {
@@ -1146,13 +1298,25 @@ module.exports = {
     checkConfirmation: checkConfirmation,
     makeCanvas: makeCanvas
 }
-},{"../view/display":7}],9:[function(require,module,exports){
+},{"../view/display":8}],10:[function(require,module,exports){
 draw = require('../view/draw');
 
+function createTimelineController(timelineView, resetFn) {
+    let lc = new ListController(timelineView); // INTERFACE
+    lc.addEventListener("input", () => {
+        resetFn();
+    });
+    document.body.appendChild(lc);
+    return lc;
+}
+
+module.exports = {
+    createTimelineController: createTimelineController
+}
 makeTimeline = function (originalContext, timeline, timelineImages, canvas) {
     // https://stackoverflow.com/questions/3420975/html5-canvas-zooming
     // http://jsfiddle.net/mBzVR/2433/
-    canvas.setAttribute("style", "background-color:green")
+    // canvas.setAttribute("style", "background-color:green")
     const tlen = timeline.length;
     var width = originalContext.canvas.width;
     var height = originalContext.canvas.height;
@@ -1180,84 +1344,6 @@ makeTimeline = function (originalContext, timeline, timelineImages, canvas) {
     return context.canvas;
 }
 
-function createTimelineController(timelineView, resetFn) {
-    let lc = new ListController(timelineView); // INTERFACE
-    lc.addEventListener("input", () => {
-        resetFn();
-    });
-    document.body.appendChild(lc);
-    return lc;
-}
-
-class ListView {
-    constructor(initial_list) {
-        this._listeners = [];
-        this._value = initial_list;
-    }
-
-    get value() {
-        return this._value;
-    }
-
-    set value(value) {
-        this._value = value;
-        this.dispatchEvent({ type: "input", value });
-    }
-
-    get length() {
-        return this._value.length;
-    }
-
-    push(elem) {
-        this._value.push(elem);
-        this.basicDispatch();
-    }
-
-    extend(li) {
-        this._value = this._value.concat(li);
-        this.basicDispatch();
-    }
-
-    pop() {
-        this._value.pop();
-        this.basicDispatch();
-    }
-
-    splice(i) {
-        this._value.splice(i);
-        this.basicDispatch();
-    }
-
-    first() {
-        return this._value[0];
-    }
-
-    last() {
-        return this._value[this._value.length - 1];
-    }
-
-    basicDispatch() {
-        const _value = this._value;
-        this.dispatchEvent({ type: "input", _value });
-    }
-
-    addEventListener(type, listener) {
-        if (type != "input" || this._listeners.includes(listener)) return;
-        this._listeners = [listener].concat(this._listeners);
-    }
-
-    removeEventListener(type, listener) {
-        if (type != "input") return;
-        this._listeners = this._listeners.filter(l => l !== listener);
-    }
-
-    dispatchEvent(event) {
-        const p = Promise.resolve(event);
-        this._listeners.forEach(l => p.then(l));
-    }
-
-}
-
 function ListController(list_view) { // list_view: viewof
     // const input = html`<input type=number start=0 min=0 step=1 style="width:auto;">`;
     const input = document.createElement("input")
@@ -1278,32 +1364,9 @@ function ListController(list_view) { // list_view: viewof
     return input;
 }
 
-class Signal {
-    constructor() {
-        this._listeners = [];
-    }
-
-    trigger() {
-        this.dispatchEvent({ type: "input" });
-    }
-    addEventListener(type, listener) {
-        if (type != "input" || this._listeners.includes(listener)) return;
-        this._listeners = [listener].concat(this._listeners);
-    }
-    removeEventListener(type, listener) {
-        if (type != "input") return;
-        this._listeners = this._listeners.filter(l => l !== listener);
-    }
-    dispatchEvent(event) {
-        const p = Promise.resolve(event);
-        this._listeners.forEach(l => p.then(l));
-    }
-}
-
 module.exports = {
     makeTimeline: makeTimeline,
     createTimelineController: createTimelineController,
-    ListView: ListView,
     ListController: ListController
 }
-},{"../view/draw":8}]},{},[6]);
+},{"../view/draw":9}]},{},[7]);

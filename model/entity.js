@@ -244,14 +244,13 @@ class TicTacToeControlQueue extends BaseControlQueue {
     }
 }
 
-class ControlQueue extends BaseControlQueue {
+class BasicTacticsControlQueue extends BaseControlQueue {
     constructor(contextSpace) {
         super()
-        // this.nextSelection = contextSpace.units;
     }
 
     calculateNext(contextSpace) {
-        return contextSpace.units.filter(u => u.team == contextSpace.team);
+        return contextSpace.units.filter(u => u.team == contextSpace.state.team);
     }
 }
 
@@ -259,6 +258,6 @@ module.exports = {
     Unit: Unit,
     Location: Location,
     TicTacToeControlQueue: TicTacToeControlQueue,
-    ControlQueue: ControlQueue,
+    BasicTacticsControlQueue: BasicTacticsControlQueue,
     Confirmation: Confirmation,
 }

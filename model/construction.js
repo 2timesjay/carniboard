@@ -2,7 +2,7 @@ entity = require('../model/entity')
 Unit = entity.Unit
 Location = entity.Location
 TicTacToeControlQueue = entity.TicTacToeControlQueue
-ControlQueue = entity.ControlQueue
+BasicTacticsControlQueue = entity.BasicTacticsControlQueue
 Confirmation = entity.Confirmation
 
 effect = require('../model/effect')
@@ -64,6 +64,50 @@ makeTicTacToe = function () {
     return state;
 }
 
+makeBasicTactics = function() {
+    let locations = [
+        [1, 0, 1, 1, 1, 0, 0, 0],
+        [1, 1, 0, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 0, 0, 1, 1],
+        [0, 1, 1, 1, 0, 0, 0, 1],
+        [1, 1, 0, 1, 1, 0, 1, 1],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+    ].map(
+        (row, y) => row.map(
+            (loc, x) => new Location(x, y, loc)
+        ));
+    let units = [
+        { 'range': 3, 'loc': [0, 0], 'name': 'anxia', 'team': 0 },
+        { 'range': 3, 'loc': [3, 1], 'name': 'boxer', 'team': 1 },
+        { 'range': 3, 'loc': [3, 2], 'name': 'caleb', 'team': 0 },
+        { 'range': 4, 'loc': [5, 5], 'name': 'deepa', 'team': 1 }
+    ].map(u => new Unit(u.name, locations[u.loc[1]][u.loc[0]], u.team, u));
+    console.log("RESET SPACE");
+    let space = new Space(locations, units, 8);
+    gameEndConfirmation = function (spc) {
+        let teamDead = function(team) {
+            let aliveUnits = spc.units.filter(u => u.team == team && u.isAlive());
+            return aliveUnits.length == 0;
+        };
+        if (teamDead(0) || teamDead(1)) {
+            return [new Confirmation(undefined, "GAME OVER", true)];
+        } else {
+            return [];
+        };
+    };
+    digestFnGetter = function (stack) { // stack => (stack => Effect[])
+        let action = stack[2];
+        return action.digestFn;
+    };
+    stack = [new BasicTacticsControlQueue(space)];
+    state = new State(space, stack, gameEndConfirmation, digestFnGetter);
+    space.state = state;
+    return state;
+}
+
 module.exports = {
-    makeTicTacToe: makeTicTacToe
+    makeTicTacToe: makeTicTacToe,
+    makeBasicTactics: makeBasicTactics
 }
