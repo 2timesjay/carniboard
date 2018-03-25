@@ -187,11 +187,26 @@ class UnitDisplay extends AbstractDisplay {
     }
 
     get xOffset() {
-        return this.unit.loc.x * size + 0.2 * size;
+        this.xOffsetTarget = this.unit.loc.x * size + 0.2 * size;
+        if (this.xOffsetCurrent == undefined){
+            this.xOffsetCurrent = this.xOffsetTarget;
+        }
+        let diff = this.xOffsetTarget - this.xOffsetCurrent;
+        let delta = Math.min(1, Math.abs(diff))*Math.sign(diff);
+        this.xOffsetCurrent += delta;
+        console.log(this.xOffsetTarget, this.xOffsetCurrent);
+        return this.xOffsetCurrent;
     }
 
     get yOffset() {
-        return this.unit.loc.y * size + 0.2 * size;
+        this.yOffsetTarget = this.unit.loc.y * size + 0.2 * size;
+        if (this.yOffsetCurrent == undefined) {
+            this.yOffsetCurrent = this.yOffsetTarget;
+        }
+        let diff = this.yOffsetTarget - this.yOffsetCurrent;
+        let delta = Math.min(1, Math.abs(diff)) * Math.sign(diff);
+        this.yOffsetCurrent += delta;
+        return this.yOffsetCurrent;
     }
 
     render(context, clr, lfa) {
