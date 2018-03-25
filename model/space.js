@@ -100,12 +100,6 @@ class Space {
     getLocation(location) { // (location: Location) => Unit[]
         return this.locations[location.y][location.x];
     }
-
-    triggerObservers(effect) { // (effect: Effect) => Effect[]
-        let triggeredEffects = this.observers.flatMap(o => o.trigger(effect));
-        this.observers = this.observers.filter(o => o.active);
-        return triggeredEffects;
-    }
 }
 
 module.exports = {

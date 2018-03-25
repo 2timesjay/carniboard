@@ -218,7 +218,7 @@ class UnitDisplay extends AbstractDisplay {
 
     isHit(mousePos) {
         var inXBounds = mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.size;
-        var inYBounds = mousePos.y >= this.yOffset - this.size && mousePos.y < this.yOffset;
+        var inYBounds = mousePos.y >= this.yOffset && mousePos.y < this.yOffset + this.size;
         return inXBounds && inYBounds;
     }
 }
@@ -373,6 +373,8 @@ module.exports = {
     Unit: UnitDisplay,
     Location: LocationDisplay,
     Path: PathDisplay,
-    Action: ActionDisplay,
+    MoveAction: ActionDisplay,
+    AttackAction: ActionDisplay,
+    ReadyCounterAction: ActionDisplay,
     Confirmation: ConfirmationDisplay
 }

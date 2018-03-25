@@ -18,3 +18,7 @@ class CounterObserver {
         }
     }
 }
+
+module.exports = {
+    CounterObserver: CounterObserver
+}

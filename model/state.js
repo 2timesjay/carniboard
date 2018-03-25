@@ -9,6 +9,12 @@ class State {
         this.inputStack = [];
     }
 
+    triggerObservers(effect) { // (effect: Effect) => Effect[]
+        let triggeredEffects = this.observers.flatMap(o => o.trigger(effect));
+        this.observers = this.observers.filter(o => o.active);
+        return triggeredEffects;
+    }
+
     advance() {
         this.team = 1 - this.team;
     }

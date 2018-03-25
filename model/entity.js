@@ -2,6 +2,13 @@ Array.prototype.flatMap = function (lambda) {
     return Array.prototype.concat.apply([], this.map(lambda));
 }
 
+effects = require("../model/effect")
+AddUnitEffect = effects.AddUnitEffect
+EndTurnEffect = effects.EndTurnEffect
+MoveEffect = effects.MoveEffect
+DamageEffect = effects.DamageEffect
+SetObserverEffect = effects.SetObserverEffect
+
 difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)))
 
 function getRandomColor() {

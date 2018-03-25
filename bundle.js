@@ -112,7 +112,10 @@ module.exports = {
     makeTicTacToe: makeTicTacToe,
     makeBasicTactics: makeBasicTactics
 }
-},{"../model/effect":2,"../model/entity":3,"../model/space":4,"../model/state":5}],2:[function(require,module,exports){
+},{"../model/effect":2,"../model/entity":3,"../model/space":5,"../model/state":6}],2:[function(require,module,exports){
+observer = require("../model/observer");
+CounterObserver = observer.CounterObserver;
+
 class Effect {
     constructor() {
     }
@@ -170,7 +173,7 @@ class DamageEffect extends Effect {
     }
 
     preExecute(contextSpace) { // (contextSpace: Space) : Effect
-        let effects = contextSpace.triggerObservers(this);
+        let effects = contextSpace.state.triggerObservers(this);
         console.log("triggered effects: ", effects);
         return effects.map(e => e.execute(contextSpace));
     }
@@ -198,19 +201,29 @@ class SetObserverEffect extends Effect {
     }
 
     execute(contextSpace) {
-        contextSpace.observers.push(new CounterObserver(this.unit));
+        contextSpace.state.observers.push(new CounterObserver(this.unit));
         return this;
     }
 }
 
 module.exports = {
     AddUnitEffect: AddUnitEffect,
-    EndTurnEffect: EndTurnEffect
+    EndTurnEffect: EndTurnEffect,
+    MoveEffect: MoveEffect,
+    DamageEffect: DamageEffect,
+    SetObserverEffect: SetObserverEffect
 }
-},{}],3:[function(require,module,exports){
+},{"../model/observer":4}],3:[function(require,module,exports){
 Array.prototype.flatMap = function (lambda) {
     return Array.prototype.concat.apply([], this.map(lambda));
 }
+
+effects = require("../model/effect")
+AddUnitEffect = effects.AddUnitEffect
+EndTurnEffect = effects.EndTurnEffect
+MoveEffect = effects.MoveEffect
+DamageEffect = effects.DamageEffect
+SetObserverEffect = effects.SetObserverEffect
 
 difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)))
 
@@ -471,7 +484,32 @@ module.exports = {
     BasicTacticsControlQueue: BasicTacticsControlQueue,
     Confirmation: Confirmation,
 }
-},{}],4:[function(require,module,exports){
+},{"../model/effect":2}],4:[function(require,module,exports){
+class CounterObserver {
+    constructor(unit) {
+        this.unit = unit;
+        this.active = true;
+    }
+
+    trigger(effect) {
+        // Counter attacks targeted at this unit.
+        if (effect.constructor.name == "DamageEffect" &&
+            effect.target.x == this.unit.loc.x &&
+            effect.target.y == this.unit.loc.y &&
+            this.unit.hp > 0) {
+            console.log("COUNTER TRIGGERED");
+            this.active = false;
+            return [new DamageEffect(this.unit, effect.unit.loc)];
+        } else {
+            return [];
+        }
+    }
+}
+
+module.exports = {
+    CounterObserver: CounterObserver
+}
+},{}],5:[function(require,module,exports){
 function argmin(arr) {
     let min = Math.min(...arr);
     return arr.indexOf(min);
@@ -574,18 +612,12 @@ class Space {
     getLocation(location) { // (location: Location) => Unit[]
         return this.locations[location.y][location.x];
     }
-
-    triggerObservers(effect) { // (effect: Effect) => Effect[]
-        let triggeredEffects = this.observers.flatMap(o => o.trigger(effect));
-        this.observers = this.observers.filter(o => o.active);
-        return triggeredEffects;
-    }
 }
 
 module.exports = {
     Space: Space
 }
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 class State {
     constructor(space, stack, gameEndFn, digestFnGetter) {
         this.space = space;
@@ -597,6 +629,12 @@ class State {
         this.inputStack = [];
     }
 
+    triggerObservers(effect) { // (effect: Effect) => Effect[]
+        let triggeredEffects = this.observers.flatMap(o => o.trigger(effect));
+        this.observers = this.observers.filter(o => o.active);
+        return triggeredEffects;
+    }
+
     advance() {
         this.team = 1 - this.team;
     }
@@ -605,7 +643,7 @@ class State {
 module.exports = {
     State: State
 }
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 class ListView {
     constructor(initial_list) {
         this._listeners = [];
@@ -701,7 +739,7 @@ module.exports = {
     Signal: Signal,
     ListView: ListView
 }
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* Imports */
 
 Array.prototype.flatMap = function (lambda) {
@@ -767,7 +805,7 @@ canvas.addEventListener(
     () => loop()
 );
 
-},{"../model/construction":1,"../utilities/wiring.js":6,"../view/draw":9,"../view/timeline":10}],8:[function(require,module,exports){
+},{"../model/construction":1,"../utilities/wiring.js":7,"../view/draw":10,"../view/timeline":11}],9:[function(require,module,exports){
 const size = 100;
 
 function getMousePos(canvasDom, mouseEvent) {
@@ -988,7 +1026,7 @@ class UnitDisplay extends AbstractDisplay {
 
     isHit(mousePos) {
         var inXBounds = mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.size;
-        var inYBounds = mousePos.y >= this.yOffset - this.size && mousePos.y < this.yOffset;
+        var inYBounds = mousePos.y >= this.yOffset && mousePos.y < this.yOffset + this.size;
         return inXBounds && inYBounds;
     }
 }
@@ -1143,10 +1181,12 @@ module.exports = {
     Unit: UnitDisplay,
     Location: LocationDisplay,
     Path: PathDisplay,
-    Action: ActionDisplay,
+    MoveAction: ActionDisplay,
+    AttackAction: ActionDisplay,
+    ReadyCounterAction: ActionDisplay,
     Confirmation: ConfirmationDisplay
 }
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 display = require('../view/display')
 
 var makeCanvas = function (width, height, attach) {
@@ -1298,7 +1338,7 @@ module.exports = {
     checkConfirmation: checkConfirmation,
     makeCanvas: makeCanvas
 }
-},{"../view/display":8}],10:[function(require,module,exports){
+},{"../view/display":9}],11:[function(require,module,exports){
 draw = require('../view/draw');
 
 function createTimelineController(timelineView, resetFn) {
@@ -1369,4 +1409,4 @@ module.exports = {
     createTimelineController: createTimelineController,
     ListController: ListController
 }
-},{"../view/draw":9}]},{},[7]);
+},{"../view/draw":10}]},{},[8]);

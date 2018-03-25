@@ -1,3 +1,6 @@
+observer = require("../model/observer");
+CounterObserver = observer.CounterObserver;
+
 class Effect {
     constructor() {
     }
@@ -55,7 +58,7 @@ class DamageEffect extends Effect {
     }
 
     preExecute(contextSpace) { // (contextSpace: Space) : Effect
-        let effects = contextSpace.triggerObservers(this);
+        let effects = contextSpace.state.triggerObservers(this);
         console.log("triggered effects: ", effects);
         return effects.map(e => e.execute(contextSpace));
     }
@@ -83,12 +86,15 @@ class SetObserverEffect extends Effect {
     }
 
     execute(contextSpace) {
-        contextSpace.observers.push(new CounterObserver(this.unit));
+        contextSpace.state.observers.push(new CounterObserver(this.unit));
         return this;
     }
 }
 
 module.exports = {
     AddUnitEffect: AddUnitEffect,
-    EndTurnEffect: EndTurnEffect
+    EndTurnEffect: EndTurnEffect,
+    MoveEffect: MoveEffect,
+    DamageEffect: DamageEffect,
+    SetObserverEffect: SetObserverEffect
 }
