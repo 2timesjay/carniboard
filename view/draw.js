@@ -1,7 +1,6 @@
 display = require('../view/display')
 
 var makeCanvas = function (width, height, attach) {
-    console.log("make canvas");
     var canvas = document.createElement("canvas");
     canvas.setAttribute("width", width);
     canvas.setAttribute("height", height);

@@ -1,5 +1,10 @@
 const size = 100;
 
+utilities = require("../view/utilities");
+makeRect = utilities.makeRect;
+makeCircle = utilities.makeCircle;
+lerp = utilities.lerp;
+
 function getMousePos(canvasDom, mouseEvent) {
     var rect = canvasDom.getBoundingClientRect();
     return {
@@ -7,37 +12,7 @@ function getMousePos(canvasDom, mouseEvent) {
         y: mouseEvent.clientY - rect.top
     };
 }
-function makeRect(x, y, context, size, clr, lfa) {
-    const alpha = lfa == undefined ? 1.0 : lfa;
-    const color = clr == undefined ? "#000000" : clr;
-    context.globalAlpha = alpha;
-    context.beginPath();
-    context.rect(x, y, size, size);
-    context.fillStyle = color;
-    context.fill();
-    context.lineWidth = 4;
-    context.strokeStyle = 'black';
-    context.stroke();
-    context.globalAlpha = 1.0;
-}
 
-function makeCircle(x, y, context, size, clr, lfa) {
-    const alpha = lfa == undefined ? 1.0 : lfa;
-    const color = clr == undefined ? "#000000" : clr;
-    var centerX = x;
-    var centerY = y;
-    var radius = size;
-
-    context.globalAlpha = alpha;
-    context.beginPath();
-    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    context.fillStyle = color;
-    context.fill();
-    context.lineWidth = 5;
-    // context.strokeStyle = color;
-    // context.stroke();
-    context.globalAlpha = 1.0;
-}
 class AbstractDisplay {
     constructor(entity) {
         this.entity = entity;
@@ -184,30 +159,53 @@ class UnitDisplay extends AbstractDisplay {
         this.size = 0.6 * size;
         this.width = 0.6 * size;
         this.height = 0.6 * size;
+
+        this.xOffsetCurrent = this.xOffsetTarget;
+        this.xGenReset(); 
+        this.yOffsetCurrent = this.yOffsetTarget;
+        this.yGenReset(); 
+    }
+
+    xGenReset() {
+        this.xOffsetGen = lerp(100, this.xOffsetCurrent, this.xOffsetTarget);
+    }
+
+    get xOffsetTarget() {
+        return this.unit.loc.x * size + 0.2 * size;
     }
 
     get xOffset() {
-        this.xOffsetTarget = this.unit.loc.x * size + 0.2 * size;
-        if (this.xOffsetCurrent == undefined){
-            this.xOffsetCurrent = this.xOffsetTarget;
+        let next = this.xOffsetGen.next();
+        if (next.done) {
+            this.xGenReset();
+            return this.xOffsetCurrent;
         }
-        let diff = this.xOffsetTarget - this.xOffsetCurrent;
-        let delta = Math.min(1, Math.abs(diff))*Math.sign(diff);
-        this.xOffsetCurrent += delta;
-        console.log(this.xOffsetTarget, this.xOffsetCurrent);
-        return this.xOffsetCurrent;
+        else {
+            this.xOffsetCurrent = next.value
+            return this.xOffsetCurrent;
+        }
+    }
+
+    yGenReset() {
+        this.yOffsetGen = lerp(100, this.yOffsetCurrent, this.yOffsetTarget);
+    }
+
+    get yOffsetTarget() {
+        return this.unit.loc.y * size + 0.2 * size
     }
 
     get yOffset() {
-        this.yOffsetTarget = this.unit.loc.y * size + 0.2 * size;
-        if (this.yOffsetCurrent == undefined) {
-            this.yOffsetCurrent = this.yOffsetTarget;
+        let next = this.yOffsetGen.next();
+        if (next.done) {
+            this.yGenReset();
+            return this.yOffsetCurrent;
         }
-        let diff = this.yOffsetTarget - this.yOffsetCurrent;
-        let delta = Math.min(1, Math.abs(diff)) * Math.sign(diff);
-        this.yOffsetCurrent += delta;
-        return this.yOffsetCurrent;
+        else {
+            this.yOffsetCurrent = next.value
+            return this.yOffsetCurrent;
+        }
     }
+
 
     render(context, clr, lfa) {
         const color = clr == undefined ? "black" : clr;
