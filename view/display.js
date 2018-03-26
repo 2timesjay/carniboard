@@ -2,16 +2,9 @@ const size = 100;
 
 utilities = require("../view/utilities");
 makeRect = utilities.makeRect;
+getMousePos = utilities.getMousePos;
 makeCircle = utilities.makeCircle;
 lerp = utilities.lerp;
-
-function getMousePos(canvasDom, mouseEvent) {
-    var rect = canvasDom.getBoundingClientRect();
-    return {
-        x: mouseEvent.clientX - rect.left,
-        y: mouseEvent.clientY - rect.top
-    };
-}
 
 class AbstractDisplay {
     constructor(entity) {
@@ -87,15 +80,10 @@ class AbstractDisplay {
         let context = canvas.getContext("2d");
         let self = this;
         let trigger = function (e) {
-            if (e.type == "mousemove") {
+            if (e.type == "mousemove" && !self.select) {
                 let mousePos = getMousePos(canvas, e);
-                if (self.select) {
-                    return;
-                }
                 if (self.isHit(mousePos)) {
-                    if (!self.select) {
-                        self.preview = true;
-                    }
+                    self.preview = true;
                     return true;
                 } else {
                     self.preview = false;

@@ -1,6 +1,7 @@
-lerp = function*(rate, current, target) {
+lerp = function*(rate, current, target, minTime) {
     /* linearly interpolate value from a to b over time t */
     let startTime = new Date().getTime();
+    let initialTime = startTime;
     while (Math.abs(target - current) > rate / 100) {
         let diff = target - current;
         let curTime = new Date().getTime();
@@ -10,7 +11,15 @@ lerp = function*(rate, current, target) {
         yield current;
         current += delta;
     }
-    yield target;
+    while (new Date().getTime() - initialTime < minTime) {
+        yield target;
+    }
+}
+
+chain = function*(...generators) {
+    for (let g of generators) {
+        yield *g;
+    }
 }
 
 // var makeCanvas = function (width, height, attach) {
@@ -30,13 +39,13 @@ lerp = function*(rate, current, target) {
 //     else { return new displayConstructor(entity); }
 // }
 
-// function getMousePos(canvasDom, mouseEvent) {
-//     var rect = canvasDom.getBoundingClientRect();
-//     return {
-//         x: mouseEvent.clientX - rect.left,
-//         y: mouseEvent.clientY - rect.top
-//     };
-// }
+function getMousePos(canvasDom, mouseEvent) {
+    var rect = canvasDom.getBoundingClientRect();
+    return {
+        x: mouseEvent.clientX - rect.left,
+        y: mouseEvent.clientY - rect.top
+    };
+}
 
 function makeRect(x, y, context, size, clr, lfa) {
     const alpha = lfa == undefined ? 1.0 : lfa;
@@ -72,6 +81,7 @@ function makeCircle(x, y, context, size, clr, lfa) {
 
 module.exports = {
     lerp: lerp,
+    getMousePos: getMousePos,
     makeRect: makeRect,
     makeCircle: makeCircle
 }
