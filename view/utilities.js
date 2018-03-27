@@ -16,6 +16,15 @@ var lerp = function*(rate, current, target, minTime) {
     }
 }
 
+var animate = function(effects) {
+    moves = effects.filter(e => e.constructor.name == "MoveEffect");
+    dests = moves.map(move => move.destination);
+    origins = [moves[0].unit.location] + dests.slice(0, dests.length - 1);
+    zipped = origins.map((v, i) => ({ o: v, d: dests[i] }));
+    let rate = 100;
+    return chain(...zipped.map(z => lerp(rate, z.o, z.d)));
+}
+
 var chain = function*(...gens) {
     for (let g of gens) {
         yield *g;

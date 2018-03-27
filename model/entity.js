@@ -251,6 +251,17 @@ class TicTacToeControlQueue extends BaseControlQueue {
     }
 }
 
+class ConnectFourControlQueue extends BaseControlQueue {
+    constructor(contextSpace) {
+        super()
+        // this.nextSelection = contextSpace.locations.flatMap(l => l);
+    }
+
+    calculateNext(contextSpace) {
+        return Array.from(difference(new Set(contextSpace.locations.flatMap(l => l)), new Set(contextSpace.units.map(u => u.loc))));
+    }
+}
+
 class BasicTacticsControlQueue extends BaseControlQueue {
     constructor(contextSpace) {
         super()
