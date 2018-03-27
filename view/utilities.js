@@ -1,4 +1,4 @@
-lerp = function*(rate, current, target, minTime) {
+var lerp = function*(rate, current, target, minTime) {
     /* linearly interpolate value from a to b over time t */
     let startTime = new Date().getTime();
     let initialTime = startTime;
@@ -8,16 +8,16 @@ lerp = function*(rate, current, target, minTime) {
         let deltaTime = curTime - startTime;
         startTime = curTime;
         let delta = Math.min(rate * deltaTime / 1000, Math.abs(diff)) * Math.sign(diff);
-        yield current;
         current += delta;
+        yield current;
     }
     while (new Date().getTime() - initialTime < minTime) {
         yield target;
     }
 }
 
-chain = function*(...generators) {
-    for (let g of generators) {
+var chain = function*(...gens) {
+    for (let g of gens) {
         yield *g;
     }
 }
