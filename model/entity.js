@@ -276,6 +276,7 @@ module.exports = {
     Unit: Unit,
     Location: Location,
     TicTacToeControlQueue: TicTacToeControlQueue,
+    ConnectFourControlQueue: ConnectFourControlQueue,
     BasicTacticsControlQueue: BasicTacticsControlQueue,
     Confirmation: Confirmation,
 }

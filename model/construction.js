@@ -1,10 +1,11 @@
 utilities = require("../utilities/utilities")
-union = utilities.union;
+intersection = utilities.intersection;
 
 entity = require('../model/entity')
 Unit = entity.Unit
 Location = entity.Location
 TicTacToeControlQueue = entity.TicTacToeControlQueue
+ConnectFourControlQueue = entity.ConnectFourControlQueue
 BasicTacticsControlQueue = entity.BasicTacticsControlQueue
 Confirmation = entity.Confirmation
 
@@ -95,7 +96,7 @@ makeConnectFour = function () {
                     return false;
                 }
                 let curHash = hash(u)
-                let partial = union(
+                let partial = intersection(
                     new Set([curHash, curHash + 1, curHash + 2, curHash + 3]),
                     hashes)
                 return partial.size == 4;
@@ -105,7 +106,7 @@ makeConnectFour = function () {
                     return false;
                 }
                 let curHash = hash(u)
-                let partial = union(
+                let partial = intersection(
                     new Set([curHash, curHash + 7, curHash + 14, curHash + 21]),
                     hashes)
                 return partial.size == 4;
@@ -115,7 +116,7 @@ makeConnectFour = function () {
                     return false;
                 }
                 let curHash = hash(u)
-                let partial = union(
+                let partial = intersection(
                     new Set([curHash, curHash + 8, curHash + 16, curHash + 24]),
                     hashes)
                 return partial.size == 4;
@@ -125,7 +126,7 @@ makeConnectFour = function () {
                     return false;
                 }
                 let curHash = hash(u)
-                let partial = union(
+                let partial = intersection(
                     new Set([curHash, curHash + 6, curHash + 12, curHash + 18]),
                     hashes)
                 return partial.size == 4;
@@ -140,9 +141,28 @@ makeConnectFour = function () {
         }
     };
     digestFnGetter = function (stk) {
+        function drop(loc) {
+            console.log("Drop from: ", loc);
+            let occupied = new Set(units.map(u => u.loc));
+            let x = loc.x;
+            for (let y = 0; y < 6; y++) {
+                if (y == 5) { 
+                    return loc; 
+                }
+                let next = space.locations[y + 1][x];
+                if (occupied.has(next)) {
+                    return loc;
+                } else {
+                    loc = next;
+                }
+            }
+            console.log("Drop to: ", loc);
+            return loc;
+        }
         return function (stk) {
             let location = stk[1];
-            return [new AddUnitEffect(location), new EndTurnEffect()];
+            let drop_loc = drop(location);
+            return [new AddUnitEffect(drop_loc), new EndTurnEffect()];
         }; // TODO: Add unit
     }
     stack = [new ConnectFourControlQueue(space)];
@@ -150,7 +170,6 @@ makeConnectFour = function () {
     space.state = state;
     return state;
 }
-
 
 makeBasicTactics = function() {
     let locations = [
@@ -197,5 +216,6 @@ makeBasicTactics = function() {
 
 module.exports = {
     makeTicTacToe: makeTicTacToe,
+    makeConnectFour: makeConnectFour,
     makeBasicTactics: makeBasicTactics
 }

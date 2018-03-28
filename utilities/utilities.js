@@ -21,3 +21,7 @@ function getRandomColor() {
     }
     return color;
 }
+
+module.exports = {
+    intersection: intersection
+}

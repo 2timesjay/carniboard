@@ -5,6 +5,7 @@ Array.prototype.flatMap = function (lambda) {
 }
 
 makeTicTacToe = require('../model/construction').makeTicTacToe;
+makeConnectFour = require('../model/construction').makeConnectFour;
 makeBasicTactics = require('../model/construction').makeBasicTactics;
 draw = require('../view/draw');
 redraw = draw.redraw;
@@ -23,10 +24,15 @@ ListView = wiring.ListView;
 // const size = 100;
 // const buildState = makeTicTacToe;
 
-// /* Basic Tactics specific setup */
-const k = 8;
+/* Connect Four specific setup */
+const k = 7;
 const size = 100;
-const buildState = makeBasicTactics;
+const buildState = makeConnectFour;
+
+// /* Basic Tactics specific setup */
+// const k = 8;
+// const size = 100;
+// const buildState = makeBasicTactics;
 
 /* Generic setup */
 const canvas = draw.makeCanvas(k * 100, k * size, true);
