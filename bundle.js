@@ -746,7 +746,6 @@ class State {
         this.digestFnGetter = digestFnGetter;
         this.observers = [];
         this.team = 0;
-        this.inputStack = [];
     }
 
     triggerObservers(effect) { // (effect: Effect) => Effect[]
