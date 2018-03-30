@@ -62,9 +62,8 @@ makeTicTacToe = function () {
             return [new AddUnitEffect(location), new EndTurnEffect()];
         }; // TODO: Add unit
     }
-    stack = [new TicTacToeControlQueue(space)];
+    stack = [new TicTacToeControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
-    space.state = state;
     return state;
 }
 
@@ -166,9 +165,8 @@ makeConnectFour = function () {
             return [new AddUnitEffect(drop_loc), new EndTurnEffect()];
         }; // TODO: Add unit
     }
-    stack = [new ConnectFourControlQueue(space)];
+    stack = [new ConnectFourControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
-    space.state = state;
     return state;
 }
 
@@ -209,9 +207,8 @@ makeBasicTactics = function() {
         let action = stack[2];
         return action.digestFn;
     };
-    stack = [new BasicTacticsControlQueue(space)];
+    stack = [new BasicTacticsControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
-    space.state = state;
     return state;
 }
 
@@ -364,8 +361,8 @@ class AbstractEntity {
         this.nextSelection = undefined;
     }
 
-    serialize() { 
-        return JSON.stringify(this);
+    clone() {
+        return Object.assign(new this.constructor(), this);
     }
 }
 
@@ -544,7 +541,7 @@ class Path {
 }
 
 class BaseControlQueue extends AbstractEntity {
-    constructor(contextSpace) {
+    constructor() {
         super()
     }
 
@@ -565,7 +562,7 @@ class BaseControlQueue extends AbstractEntity {
 }
 
 class TicTacToeControlQueue extends BaseControlQueue {
-    constructor(contextSpace) {
+    constructor() {
         super()
         // this.nextSelection = contextSpace.locations.flatMap(l => l);
     }
@@ -576,7 +573,7 @@ class TicTacToeControlQueue extends BaseControlQueue {
 }
 
 class ConnectFourControlQueue extends BaseControlQueue {
-    constructor(contextSpace) {
+    constructor() {
         super()
         // this.nextSelection = contextSpace.locations.flatMap(l => l);
     }
@@ -587,7 +584,7 @@ class ConnectFourControlQueue extends BaseControlQueue {
 }
 
 class BasicTacticsControlQueue extends BaseControlQueue {
-    constructor(contextSpace) {
+    constructor() {
         super()
     }
 
@@ -732,6 +729,12 @@ class Space {
     getLocation(location) { // (location: Location) => Unit[]
         return this.locations[location.y][location.x];
     }
+
+    clone() {
+        let clonedLocations = this.locations.map(row => row.map(loc => loc.clone())); // TODO: generalize to iterator
+        let clonedUnits = this.units.map(u => u.clone());
+        return new Space(clonedLocations, clonedUnits, this.k);
+    }
 }
 
 module.exports = {
@@ -742,11 +745,11 @@ class State {
     constructor(space, stack, gameEndFn, digestFnGetter) {
         this.space = space;
         this.stack = stack;
+        this.space.state = this;
         this.gameEndFn = gameEndFn;
         this.digestFnGetter = digestFnGetter;
         this.observers = [];
         this.team = 0;
-        this.inputStack = [];
     }
 
     triggerObservers(effect) { // (effect: Effect) => Effect[]
@@ -757,6 +760,15 @@ class State {
 
     advance() {
         this.team = 1 - this.team;
+    }
+
+    clone() {
+        let clonedSpace = this.space.clone();
+        if (stack.length > 1) {
+            return "FAILED";
+        }
+        let clonedStack = stack.map(e => e.clone());
+        return new State(clonedSpace, clonedStack, this.gameEndFn, this.digestFnGetter);
     }
 }
 

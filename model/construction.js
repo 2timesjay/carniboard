@@ -61,9 +61,8 @@ makeTicTacToe = function () {
             return [new AddUnitEffect(location), new EndTurnEffect()];
         }; // TODO: Add unit
     }
-    stack = [new TicTacToeControlQueue(space)];
+    stack = [new TicTacToeControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
-    space.state = state;
     return state;
 }
 
@@ -165,9 +164,8 @@ makeConnectFour = function () {
             return [new AddUnitEffect(drop_loc), new EndTurnEffect()];
         }; // TODO: Add unit
     }
-    stack = [new ConnectFourControlQueue(space)];
+    stack = [new ConnectFourControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
-    space.state = state;
     return state;
 }
 
@@ -208,9 +206,8 @@ makeBasicTactics = function() {
         let action = stack[2];
         return action.digestFn;
     };
-    stack = [new BasicTacticsControlQueue(space)];
+    stack = [new BasicTacticsControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
-    space.state = state;
     return state;
 }
 

@@ -40,8 +40,8 @@ class AbstractEntity {
         this.nextSelection = undefined;
     }
 
-    serialize() { 
-        return JSON.stringify(this);
+    clone() {
+        return Object.assign(new this.constructor(), this);
     }
 }
 
@@ -220,7 +220,7 @@ class Path {
 }
 
 class BaseControlQueue extends AbstractEntity {
-    constructor(contextSpace) {
+    constructor() {
         super()
     }
 
@@ -241,7 +241,7 @@ class BaseControlQueue extends AbstractEntity {
 }
 
 class TicTacToeControlQueue extends BaseControlQueue {
-    constructor(contextSpace) {
+    constructor() {
         super()
         // this.nextSelection = contextSpace.locations.flatMap(l => l);
     }
@@ -252,7 +252,7 @@ class TicTacToeControlQueue extends BaseControlQueue {
 }
 
 class ConnectFourControlQueue extends BaseControlQueue {
-    constructor(contextSpace) {
+    constructor() {
         super()
         // this.nextSelection = contextSpace.locations.flatMap(l => l);
     }
@@ -263,7 +263,7 @@ class ConnectFourControlQueue extends BaseControlQueue {
 }
 
 class BasicTacticsControlQueue extends BaseControlQueue {
-    constructor(contextSpace) {
+    constructor() {
         super()
     }
 

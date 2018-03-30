@@ -100,6 +100,12 @@ class Space {
     getLocation(location) { // (location: Location) => Unit[]
         return this.locations[location.y][location.x];
     }
+
+    clone() {
+        let clonedLocations = this.locations.map(row => row.map(loc => loc.clone())); // TODO: generalize to iterator
+        let clonedUnits = this.units.map(u => u.clone());
+        return new Space(clonedLocations, clonedUnits, this.k);
+    }
 }
 
 module.exports = {
