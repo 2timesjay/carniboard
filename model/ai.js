@@ -2,12 +2,21 @@ Array.prototype.flatMap = function (lambda) {
     return Array.prototype.concat.apply([], this.map(lambda));
 }
 
+explore = function(state, stackSequence) {
+    let clone = state.clone();
+    let space = clone.space;
+    let digestFnGetter = clone.digestFnGetter;
+    for (stack of stackSequence) {
+        let digestFn = digestFnGetter(stack);
+        let effects = digestFn(stack);
+        effects.map(e => e.execute(space));
+    }
+    return clone;
+}
+
 generateAllSelections = function (state) {
     let stack = state.stack;
     let space = state.space;
-    // let digestFnGetter = state.digestFnGetter;
-    // let digestFn = digestFnGetter(stack);
-    // let effects = digestFn(stack)
     return generateAllSelectionsHelper(stack, space);
 }
 
