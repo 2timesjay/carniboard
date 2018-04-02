@@ -28,26 +28,27 @@ makeTicTacToe = function () {
     let units = [];
     let space = new Space(locations, units, 3);
 
+    function threeInARow(team) {
+        let xs = team.map(u => u.loc.x);
+        let ys = team.map(u => u.loc.y);
+        function udlr(coords) {
+            let counts = [0, 0, 0];
+            for (let i = 0; i < coords.length; ++i) {
+                counts[coords[i]] += 1;
+            }
+            return Math.max(...counts) == 3;
+        }
+        function diag(units) {
+            let hashes = units.map(u => u.loc.y * 3 + u.loc.x);
+            return ((hashes.indexOf(0) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(8) >= 0)
+                || (hashes.indexOf(2) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(6) >= 0))
+        }
+        return udlr(xs) || udlr(ys) || diag(team);
+    }
+
     gameEndConfirmation = function (spc) {
         let t0 = spc.units.filter(u => u.team == 0);
         let t1 = spc.units.filter(u => u.team == 1);
-        function threeInARow(team) {
-            let xs = team.map(u => u.loc.x);
-            let ys = team.map(u => u.loc.y);
-            function udlr(coords) {
-                let counts = [0, 0, 0];
-                for (let i = 0; i < coords.length; ++i) {
-                    counts[coords[i]] += 1;
-                }
-                return Math.max(...counts) == 3;
-            }
-            function diag(units) {
-                let hashes = units.map(u => u.loc.y * 3 + u.loc.x);
-                return ((hashes.indexOf(0) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(8) >= 0)
-                    || (hashes.indexOf(2) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(6) >= 0))
-            }
-            return udlr(xs) || udlr(ys) || diag(team);
-        }
         let over = (spc.units.length == 9) || threeInARow(t0) || threeInARow(t1);
         if (over) {
             return [new Confirmation(undefined, "GAME OVER", true)];
@@ -61,8 +62,16 @@ makeTicTacToe = function () {
             return [new AddUnitEffect(location), new EndTurnEffect()];
         }; // TODO: Add unit
     }
+    scoreFn = function (state) {
+        let spc = state.space;
+        let curTeam = spc.units.filter(u => u.team == state.team);
+        let otherTeam = spc.units.filter(u => u.team == 1 - state.team);
+        if (threeInARow(curTeam)) { return 1;}
+        else if (threeInARow(otherTeam)) {return -1;}
+        else { return 0; }
+    }
     stack = [new TicTacToeControlQueue()];
-    state = new State(space, stack, gameEndConfirmation, digestFnGetter);
+    state = new State(space, stack, gameEndConfirmation, digestFnGetter, scoreFn);
     return state;
 }
 

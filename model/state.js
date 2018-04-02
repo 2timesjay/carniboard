@@ -1,12 +1,20 @@
 class State {
-    constructor(space, stack, gameEndFn, digestFnGetter) {
+    constructor(space, stack, gameEndFn, digestFnGetter, scoreFn) {
         this.space = space;
         this.stack = stack;
         this.space.state = this;
         this.gameEndFn = gameEndFn;
         this.digestFnGetter = digestFnGetter;
+        this.scoreFn = scoreFn;
         this.observers = [];
         this.team = 0;
+    }
+
+    get score() { // (): number
+        /**
+         * Score from current team's perspective.
+         */
+        return this.scoreFn(this);
     }
 
     triggerObservers(effect) { // (effect: Effect) => Effect[]

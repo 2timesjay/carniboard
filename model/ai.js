@@ -2,11 +2,20 @@ Array.prototype.flatMap = function (lambda) {
     return Array.prototype.concat.apply([], this.map(lambda));
 }
 
-explore = function(state, stackSequence) {
+score = function(state) {  // (state: State): number 
+    return state.score
+}
+
+policy = function(state) {  // (state: State): number[]
+}
+
+score
+
+executeStacks = function(state, stacks) {
     let clone = state.clone();
     let space = clone.space;
     let digestFnGetter = clone.digestFnGetter;
-    for (stack of stackSequence) {
+    for (stack of stacks) {
         let digestFn = digestFnGetter(stack);
         let effects = digestFn(stack);
         effects.map(e => e.execute(space));
