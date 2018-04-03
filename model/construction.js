@@ -90,57 +90,59 @@ makeConnectFour = function () {
     let units = [];
     let space = new Space(locations, units, 7);
 
+    function fourInARow(team) {
+        function hash(u) {
+            return u.loc.y * 7 + u.loc.x;
+        }
+        let hashes = new Set(team.map(u => hash(u)));
+        // Horizontal
+        function horizontal(u) {
+            if (u.loc.x >= 4) {
+                return false;
+            }
+            let curHash = hash(u)
+            let partial = intersection(
+                new Set([curHash, curHash + 1, curHash + 2, curHash + 3]),
+                hashes)
+            return partial.size == 4;
+        }
+        function vertical(u) {
+            if (u.loc.y >= 3) {
+                return false;
+            }
+            let curHash = hash(u)
+            let partial = intersection(
+                new Set([curHash, curHash + 7, curHash + 14, curHash + 21]),
+                hashes)
+            return partial.size == 4;
+        }
+        function diagDown(u) {
+            if (u.loc.y >= 3 || u.loc.x >= 4) {
+                return false;
+            }
+            let curHash = hash(u)
+            let partial = intersection(
+                new Set([curHash, curHash + 8, curHash + 16, curHash + 24]),
+                hashes)
+            return partial.size == 4;
+        }
+        function diagUp(u) {
+            if (u.loc.y >= 3 || u.loc.x < 3) {
+                return false;
+            }
+            let curHash = hash(u)
+            let partial = intersection(
+                new Set([curHash, curHash + 6, curHash + 12, curHash + 18]),
+                hashes)
+            return partial.size == 4;
+        }
+        return team.some(u => horizontal(u) || vertical(u) || diagDown(u) || diagUp(u));
+    }
+
     gameEndConfirmation = function (spc) {
         let t0 = spc.units.filter(u => u.team == 0);
         let t1 = spc.units.filter(u => u.team == 1);
-        function fourInARow(team) {
-            function hash(u) {
-                return u.loc.y * 7 + u.loc.x;
-            }
-            let hashes = new Set(team.map(u => hash(u)));
-            // Horizontal
-            function horizontal(u) {
-                if (u.loc.x >= 4) {
-                    return false;
-                }
-                let curHash = hash(u)
-                let partial = intersection(
-                    new Set([curHash, curHash + 1, curHash + 2, curHash + 3]),
-                    hashes)
-                return partial.size == 4;
-            }
-            function vertical(u) {
-                if (u.loc.y >= 3) {
-                    return false;
-                }
-                let curHash = hash(u)
-                let partial = intersection(
-                    new Set([curHash, curHash + 7, curHash + 14, curHash + 21]),
-                    hashes)
-                return partial.size == 4;
-            } 
-            function diagDown(u) {
-                if (u.loc.y >= 3 || u.loc.x >= 4) {
-                    return false;
-                }
-                let curHash = hash(u)
-                let partial = intersection(
-                    new Set([curHash, curHash + 8, curHash + 16, curHash + 24]),
-                    hashes)
-                return partial.size == 4;
-            }
-            function diagUp(u) {
-                if (u.loc.y >= 3 || u.loc.x < 3) {
-                    return false;
-                }
-                let curHash = hash(u)
-                let partial = intersection(
-                    new Set([curHash, curHash + 6, curHash + 12, curHash + 18]),
-                    hashes)
-                return partial.size == 4;
-            }
-            return team.some(u => horizontal(u) || vertical(u) || diagDown(u) || diagUp(u));
-        }
+        
         let over = (spc.units.length == 42) || fourInARow(t0) || fourInARow(t1);
         if (over) {
             return [new Confirmation(undefined, "GAME OVER", true)];
@@ -173,6 +175,16 @@ makeConnectFour = function () {
             return [new AddUnitEffect(drop_loc), new EndTurnEffect()];
         }; // TODO: Add unit
     }
+
+    scoreFn = function (state) {
+        let spc = state.space;
+        let curTeam = spc.units.filter(u => u.team == state.team);
+        let otherTeam = spc.units.filter(u => u.team == 1 - state.team);
+        if (fourInARow(curTeam)) { return 1; }
+        else if (fourInARow(otherTeam)) { return -1; }
+        else { return 0; }
+    }
+
     stack = [new ConnectFourControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
     return state;
@@ -200,12 +212,14 @@ makeBasicTactics = function() {
     ].map(u => new Unit(u.name, locations[u.loc[1]][u.loc[0]], u.team, u));
     console.log("RESET SPACE");
     let space = new Space(locations, units, 8);
+    let teamDead = function (team) {
+        let aliveUnits = team.filter(u => u.isAlive());
+        return aliveUnits.length == 0;
+    };
     gameEndConfirmation = function (spc) {
-        let teamDead = function(team) {
-            let aliveUnits = spc.units.filter(u => u.team == team && u.isAlive());
-            return aliveUnits.length == 0;
-        };
-        if (teamDead(0) || teamDead(1)) {
+        let t0 = spc.units.filter(u => u.team == 0);
+        let t1 = spc.units.filter(u => u.team == 1);
+        if (teamDead(t0) || teamDead(t1)) {
             return [new Confirmation(undefined, "GAME OVER", true)];
         } else {
             return [];
@@ -215,6 +229,15 @@ makeBasicTactics = function() {
         let action = stack[2];
         return action.digestFn;
     };
+
+    scoreFn = function (state) {
+        let spc = state.space;
+        let curTeam = spc.units.filter(u => u.team == state.team);
+        let otherTeam = spc.units.filter(u => u.team == 1 - state.team);
+        if (teamDead(otherTeam)) { return 1; }
+        else if (teamDead(curTeam)) { return -1; }
+        else { return 0; }
+    }
     stack = [new BasicTacticsControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
     return state;
