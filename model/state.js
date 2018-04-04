@@ -17,6 +17,13 @@ class State {
         return this.scoreFn(this);
     }
 
+    isOver() { // (): number
+        /**
+         * Score from current team's perspective.
+         */
+        return this.gameEndFn(this.space).length > 0;
+    }
+
     triggerObservers(effect) { // (effect: Effect) => Effect[]
         let triggeredEffects = this.observers.flatMap(o => o.trigger(effect));
         this.observers = this.observers.filter(o => o.active);
@@ -29,11 +36,11 @@ class State {
 
     clone() {
         let clonedSpace = this.space.clone();
-        if (stack.length > 1) {
-            return "FAILED";
-        }
-        let clonedStack = stack.map(e => e.clone());
-        return new State(clonedSpace, clonedStack, this.gameEndFn, this.digestFnGetter);
+        // if (stack.length > 1) {
+        //     return "FAILED";
+        // }
+        let clonedStack = [stack[0].clone()];
+        return new this.constructor(clonedSpace, clonedStack, this.gameEndFn, this.digestFnGetter, this.scoreFn);
     }
 }
 

@@ -238,6 +238,10 @@ class BaseControlQueue extends AbstractEntity {
     getNextSelection(contextSpace) {
         return this.checkEnd(contextSpace) || this.calculateNext(contextSpace);
     }
+
+    clone() {
+        return new this.constructor();
+    }
 }
 
 class TicTacToeControlQueue extends BaseControlQueue {

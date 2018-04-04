@@ -29,16 +29,20 @@ rollout = function(state) {
     let max_turns = 50;
     let cur_turn = 0;
     let rollout_state = state;
-    while (cur_turn < max_turns) {
+    while (cur_turn < max_turns && !rollout_state.isOver() ) {
         cur_turn++;
+        console.log(cur_turn);
         let selections = generateAllSelections(state);
-        let policy = policy(selections);
-        let selection = selections[selectFromDistribution(policy)];
+        let pol = policy(selections);
+        let selection = selections[selectFromDistribution(pol)];
+        console.log(selection);
         rollout_state = executeStacks(state, [selection])
     }
+    return rollout_state;
 }
 
 executeStacks = function(state, stacks) {
+    // TODO: Buggy due to cloning state but not cloning stack.
     let clone = state.clone();
     let space = clone.space;
     let digestFnGetter = clone.digestFnGetter;
@@ -68,4 +72,5 @@ generateAllSelectionsHelper = function(stack, space) {
 
 module.exports = {
     generateAllSelections: generateAllSelections,
+    rollout: rollout,
 }
