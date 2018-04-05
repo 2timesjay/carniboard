@@ -44,8 +44,7 @@ class MoveEffect extends Effect {
 
     execute(contextSpace) {
         this.unit = contextSpace.units.filter(u => u.name == this.unit.name)[0]; // Questionable way to update unit on refresh.
-        this.unit.loc = contextSpace.locations[this.destination.y][this.destination.x];
-        // this.unit.loc = this.destination;
+        this.unit.loc = contextSpace.getLocation(this.destination);
         return this;
     }
 }

@@ -48,13 +48,13 @@ test('testTicTacToeScore', function (t) {
 });
 
 test('testRollout', function (t) {
-    t.plan(1);
-    let state = makeTicTacToe();
-    let stack = state.stack;
-    let locations = state.space.locations;
-    rollout_state = ai.rollout(state);
-    console.log(rollout_state.space);
-    console.log(rollout_state.space.units.map(u => u.loc));
-    t.ok(rollout_state.space.units.length >=5,
-         rollout_state.space.units)
+    t.plan(10);
+    for (let i = 0; i < 10; i++) {
+        let state = makeTicTacToe();
+        let stack = state.stack;
+        let locations = state.space.locations;
+        rollout_state = ai.rollout(state);
+        t.ok(rollout_state.space.units.length >= 5,
+            "Expected more than 5 units, got : " + rollout_state.space.units.length + "\r\n" + rollout_state.space.units.map(u => "(" + u.loc.x + ", " + u.loc.y + ")"))
+    }
 });

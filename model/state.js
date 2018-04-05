@@ -35,10 +35,8 @@ class State {
     }
 
     clone() {
+    // TODO: Cloning relies on effect implementation matching distinct objects
         let clonedSpace = this.space.clone();
-        // if (stack.length > 1) {
-        //     return "FAILED";
-        // }
         let clonedStack = [stack[0].clone()];
         return new this.constructor(clonedSpace, clonedStack, this.gameEndFn, this.digestFnGetter, this.scoreFn);
     }

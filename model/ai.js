@@ -28,30 +28,27 @@ selectFromDistribution = function(distribution) {
 rollout = function(state) {
     let max_turns = 50;
     let cur_turn = 0;
-    let rollout_state = state;
+    let rollout_state = state.clone();
     while (cur_turn < max_turns && !rollout_state.isOver() ) {
         cur_turn++;
-        console.log(cur_turn);
-        let selections = generateAllSelections(state);
+        let selections = generateAllSelections(rollout_state);
         let pol = policy(selections);
         let selection = selections[selectFromDistribution(pol)];
-        console.log(selection);
-        rollout_state = executeStacks(state, [selection])
+        rollout_state = executeStacks(rollout_state, [selection])
     }
     return rollout_state;
 }
 
 executeStacks = function(state, stacks) {
-    // TODO: Buggy due to cloning state but not cloning stack.
-    let clone = state.clone();
-    let space = clone.space;
-    let digestFnGetter = clone.digestFnGetter;
+    // TODO: Cloning relies on effect implementation matching distinct objects
+    let space = state.space;
+    let digestFnGetter = state.digestFnGetter;
     for (stack of stacks) {
         let digestFn = digestFnGetter(stack);
         let effects = digestFn(stack);
         effects.map(e => e.execute(space));
     }
-    return clone;
+    return state;
 }
 
 generateAllSelections = function (state) {
