@@ -25,9 +25,9 @@ ListView = wiring.ListView;
 // const buildState = makeTicTacToe;
 
 /* Connect Four specific setup */
-const k = 7;
+const k = 8;
 const size = 100;
-const buildState = makeConnectFour;
+const buildState = makeBasicTactics;
 
 // /* Basic Tactics specific setup */
 // const k = 8;

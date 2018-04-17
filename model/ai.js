@@ -6,11 +6,18 @@ score = function(state) {  // (state: State): number
     return state.score;
 }
 
-policy = function(selections) {  // (selections: selection[]): number[]
+random_policy = function(selections) {  // (selections: selection[]): number[]
     if (selections.length == 0) { return []; }
-    let random_policy = new Array(selections.length);
-    random_policy.fill(1.0/selections.length);
-    return random_policy;
+    let uniform_random = new Array(selections.length);
+    uniform_random.fill(1.0/selections.length);
+    return uniform_random;
+}
+
+improved_policy = function (selections, state, Q, N) {  // (selections: selection[]): number[]
+    if (selections.length == 0) { return []; }
+    let uniform_random = new Array(selections.length);
+    uniform_random.fill(1.0 / selections.length);
+    return uniform_random;
 }
 
 selectFromDistribution = function(distribution) {
@@ -32,7 +39,7 @@ rollout = function(state) {
     while (cur_turn < max_turns && !rollout_state.isOver() ) {
         cur_turn++;
         let selections = generateAllSelections(rollout_state);
-        let pol = policy(selections);
+        let pol = random_policy(selections);
         let selection = selections[selectFromDistribution(pol)];
         rollout_state = executeStacks(rollout_state, [selection])
     }

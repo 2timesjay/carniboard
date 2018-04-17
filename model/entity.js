@@ -20,6 +20,10 @@ function getRandomColor() {
     return color;
 }
 
+function hashIncr(hash, val){
+    return hash << 5 + val % 805306457;
+}
+
 class AbstractEntity {
     constructor() {
         this.clearNextSelection();
@@ -40,6 +44,10 @@ class AbstractEntity {
         this.nextSelection = undefined;
     }
 
+    hash(input) {
+        return 1776 * 2018;
+    }
+
     clone() {
         return Object.assign(new this.constructor(), this);
     }
@@ -56,6 +64,14 @@ class Location extends AbstractEntity {
 
     regenerateNextSelection(contextSpace) {
         this.nextSelection = [new Confirmation(this)];
+    }
+
+    hash(){
+        let hash = super.hash();
+        hash = hashIncr(this.x);
+        hash = hashIncr(this.y);
+        hash = hashIncr(this.traversable);
+        return hash;
     }
 }
 
@@ -95,6 +111,20 @@ class BaseUnit extends AbstractEntity { // isa Entity
         } else {
             this.nextSelection = [];
         }
+    }
+
+    hash() {
+        let hash = super.hash();
+        hash = hashIncr(this.range);
+        hash = hashIncr(this.arange);
+        hash = hashIncr(this.maxhp);
+        hash = hashIncr(this.hp);
+        hash = hashIncr(this.dmg);
+        //hash = hashIncr(this.name);
+        hash = hashIncr(this.loc.hash());
+        hash = hashIncr(this.team);
+        //hash = hashIncr(actionClasses);
+        return hash;
     }
 }
 
