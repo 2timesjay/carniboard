@@ -4,6 +4,8 @@ Array.prototype.flatMap = function (lambda) {
     return Array.prototype.concat.apply([], this.map(lambda));
 }
 
+console.log("Starting");
+
 makeTicTacToe = require('../model/construction').makeTicTacToe;
 makeConnectFour = require('../model/construction').makeConnectFour;
 makeBasicTactics = require('../model/construction').makeBasicTactics;
@@ -25,9 +27,9 @@ ListView = wiring.ListView;
 // const buildState = makeTicTacToe;
 
 /* Connect Four specific setup */
-const k = 8;
+const k = 7;
 const size = 100;
-const buildState = makeBasicTactics;
+const buildState = makeConnectFour;
 
 // /* Basic Tactics specific setup */
 // const k = 8;
@@ -60,6 +62,7 @@ var loop = function() {
     tl_render_fn();
 }
 loop();
+
 canvas.addEventListener(
     'mousemove', 
     () => loop()
