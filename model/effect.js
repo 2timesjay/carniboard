@@ -9,6 +9,11 @@ class Effect {
 
     execute() { }
 
+
+    animationDuration(){
+        return 0;
+    }
+
     postExecute() { }
 }
 
@@ -46,6 +51,10 @@ class MoveEffect extends Effect {
         this.unit = contextSpace.units.filter(u => u.name == this.unit.name)[0]; // Questionable way to update unit on refresh.
         this.unit.loc = contextSpace.getLocation(this.destination);
         return this;
+    }
+
+    animationDuration() {
+        return 1000* (Math.abs(this.unit.loc.x - this.destination.x) + Math.abs(this.unit.loc.y - this.destination.y));
     }
 }
 

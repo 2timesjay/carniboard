@@ -27,14 +27,14 @@ ListView = wiring.ListView;
 // const buildState = makeTicTacToe;
 
 /* Connect Four specific setup */
-const k = 7;
-const size = 100;
-const buildState = makeConnectFour;
+// const k = 7;
+// const size = 100;
+// const buildState = makeConnectFour;
 
 // /* Basic Tactics specific setup */
-// const k = 8;
-// const size = 100;
-// const buildState = makeBasicTactics;
+const k = 8;
+const size = 100;
+const buildState = makeBasicTactics;
 
 /* Generic setup */
 const canvas = draw.makeCanvas(k * 100, k * size, true);

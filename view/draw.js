@@ -99,7 +99,8 @@ var checkConfirmation = function (state, timelineView) {
             let top = stack[stack.length - 1];
             top.display._deselect(stack);
         }
-        let executed_effects = effects.map(e => e.execute(space)); // TODO: Ensure counters pushed to timeline properly
+        executed_effects = execute(effects, space);
+         // TODO: Ensure counters pushed to timeline properly
         console.log("Post Execution: ", state);
         if (timelineView != undefined) {
             timelineView.push(executed_effects); // INTERFACE
@@ -110,14 +111,33 @@ var checkConfirmation = function (state, timelineView) {
     return false;
 }
 
-var addListeners = function(context, triggerList, eventSignalView) {
+var execute = function(effects, space) {
+    var effectToPromise = function(effect) {
+        return () => {
+            let effectPromise = new Promise((resolve, reject) => {
+                let duration = effect.animationDuration();
+                let result = effect.execute(space);
+                let executeAndAnimate = setTimeout(() => {
+                    clearTimeout(executeAndAnimate);
+                    resolve(result);
+                    console.log("PROMISED: ", duration, effect);
+                }, duration)
+            })
+            return effectPromise;
+        }
+    }
+
+    var executionPromise = effects.reduce((prev, cur) => prev.then(effectToPromise(cur)), Promise.resolve());
+    //executionPromise.then();
+    return effects;
+}
+
+var addListeners = function(context, triggerList) {
     context.canvas.onmousemove = function (event) {
         triggerList.map(t => t(event))
-        // eventSignalView.trigger();
     }
     context.canvas.onclick = function (event) {
         triggerList.forEach(t => t(event));
-        // eventSignalView.trigger();
     }
 }
 
