@@ -373,4 +373,9 @@ class ConfirmationDisplay extends AbstractDisplay {
 module.exports = {
     Unit: UnitDisplay,
     Location: LocationDisplay,
+    Path: PathDisplay,
+    MoveAction: ActionDisplay,
+    AttackAction: ActionDisplay,
+    ReadyCounterAction: ActionDisplay,
+    Confirmation: ConfirmationDisplay
 }

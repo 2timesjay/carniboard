@@ -31,22 +31,26 @@ var chain = function*(...gens) {
     }
 }
 
-// var makeCanvas = function (width, height, attach) {
-//     var canvas = document.createElement("canvas");
-//     canvas.setAttribute("width", width);
-//     canvas.setAttribute("height", height);
-//     if (attach) {
-//         document.body.appendChild(canvas);
-//     }
-//     return canvas;
-// }
+function getGroup(scene) {
+    objects = scene.children
+    group = objects[objects.length - 1]
+    return group
+}
 
-// var addDisplay = function (entity) {
-//     var className = entity.constructor.name;
-//     var displayConstructor = display[className];
-//     if (displayConstructor == undefined) { return undefined; }
-//     else { return new displayConstructor(entity); }
-// }
+function clear(context){
+    function clearThree(obj) {
+        while (obj.children.length > 0) {
+            clearThree(obj.children[0])
+            obj.remove(obj.children[0]);
+        }
+        if (obj.geometry) obj.geometry.dispose()
+        if (obj.material) obj.material.dispose()
+        if (obj.texture) obj.texture.dispose()
+    }
+
+    var group = getGroup(context.scene);
+    clearThree(group);
+}
 
 function getMousePos(canvasDom, mouseEvent) {
     var rect = canvasDom.getBoundingClientRect();
@@ -56,18 +60,18 @@ function getMousePos(canvasDom, mouseEvent) {
     };
 }
 
-function makeRect(x, y, context, size, clr, lfa) {
-    const alpha = lfa == undefined ? 1.0 : lfa;
-    const color = clr == undefined ? "#000000" : clr;
-    context.globalAlpha = alpha;
-    context.beginPath();
-    context.rect(x, y, size, size);
-    context.fillStyle = color;
-    context.fill();
-    context.lineWidth = 4;
-    context.strokeStyle = 'black';
-    context.stroke();
-    context.globalAlpha = 1.0;
+function makeRect(x, y, context, size, clr, lfa) {  // Make cuboid
+    const lfa = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
+    const clr = clr == undefined ? "#000000" : clr; 
+
+    let geometry = new THREE.CubeGeometry(size,size, size);
+    // let blockMesh = new THREE.Mesh(geometry, material);
+    let blockMesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: clr }));
+    blockMesh.position.x = x;
+    blockMesh.position.y = y;
+    blockMesh.position.z = 0;
+    blockMesh.coords = co;
+    scene.add(blockMesh);
 }
 
 function makeCircle(x, y, context, size, clr, lfa) {
@@ -92,5 +96,7 @@ module.exports = {
     lerp: lerp,
     getMousePos: getMousePos,
     makeRect: makeRect,
-    makeCircle: makeCircle
+    makeCircle: makeCircle,
+    clear: clear,
+    getGroup: getGroup,
 }
