@@ -156,24 +156,20 @@ function render() {
 }
 
 
-var init = function () {
+var init = function (canvas) {
     // Rendering Canvas
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    renderCanvas = makeCanvas(WIDTH, HEIGHT, false);
+    renderCanvas = canvas
     renderContext = renderCanvas.getContext("webgl");
-    document.body.appendChild(renderCanvas)
 
     // Camera and Scene
     camera = _getCamera();
     scene = _getScene();
     scene = _populateSimpleScene(scene, _getCoords());
     raycaster = _getRaycaster();
-    renderer = new THREE.WebGLRenderer({ canvas: renderCanvas });
+    renderer = new THREE.WebGLRenderer({ canvas: renderCanvas});
     controls = _getControls(camera, renderer.domElement);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(WIDTH, HEIGHT);
-    container.appendChild(renderer.domElement);
     renderContext.scene = scene;
     console.log(scene)
     utilities.clear(renderContext);
@@ -257,60 +253,12 @@ var addListeners = function (context, triggerList) { // Add Listeners
     }
 }
 
-// Very detacted from draw/display. Fits Controller.
-var checkConfirmation = function (state, timelineView) {
-    let space = state.space
-    let stack = state.stack;
-    let digestFnGetter = state.digestFnGetter;
-    let topSel = stack[stack.length - 1].getNextSelection(space);
-    if (topSel.length > 0 && topSel[0].constructor.name == "Confirmation" && !topSel[0].isEnd) {
-        console.log("CONFIRMED: ", stack);
-        let digestFn = digestFnGetter(stack);
-        let effects = digestFn(stack);
-        while (stack.length > 1) {
-            let top = stack[stack.length - 1];
-            top.display._deselect(stack);
-        }
-        executed_effects = execute(effects, space);
-        // TODO: Ensure counters pushed to timeline properly
-        console.log("Post Execution: ", state);
-        if (timelineView != undefined) {
-            timelineView.push(executed_effects); // INTERFACE
-            console.log("Timeline: ", timelineView);
-        }
-        return true;
-    }
-    return false;
-}
 
-// Very detacted from draw/display. Fits Controller.
-var execute = function (effects, space) {  // Clarify as "requestExecution"
-    var effectToPromise = function (effect) { // TODO: This is incomprehensible
-        return () => {
-            let effectPromise = new Promise((resolve, reject) => {
-                let duration = effect.animationDuration();
-                let result = effect.execute(space);
-                let executeAndAnimate = setTimeout(() => {
-                    clearTimeout(executeAndAnimate);
-                    resolve(result);
-                    console.log("PROMISED: ", duration, effect);
-                }, duration)
-            })
-            return effectPromise;
-        }
-    }
-
-    var executionPromise = effects.reduce((prev, cur) => prev.then(effectToPromise(cur)), Promise.resolve());
-    //executionPromise.then();
-    return effects;
-}
-
-init();
-animate();
 
 module.exports = {
     redraw: redraw,
     addListeners: addListeners,
-    checkConfirmation: checkConfirmation,
-    makeCanvas: makeCanvas
+    makeCanvas: makeCanvas,
+    init: init, // TODO: Remove
+    animate: animate, //TODO: Remove
 }
