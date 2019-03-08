@@ -1,4 +1,4 @@
-const size = 100;
+const size = 1;
 
 utilities = require("../view/utilitiesthree");
 makeRect = utilities.makeRect;
@@ -57,7 +57,7 @@ class AbstractDisplay {
 
     selectListener(canvas, stack) {
         // Select by click - clicks off this element de-select.
-        let context = canvas.getContext("2d");
+        let context = canvas.getContext("webgl");
         let self = this;
         let trigger = function (e) {
             // console.log("Expended? ",e.expended);
@@ -77,7 +77,7 @@ class AbstractDisplay {
 
     previewListener(canvas) {
         // Preview if not selected.
-        let context = canvas.getContext("2d");
+        let context = canvas.getContext("webgl");
         let self = this;
         let trigger = function (e) {
             if (e.type == "mousemove" && !self.select) {
@@ -100,8 +100,8 @@ class LocationDisplay extends AbstractDisplay {
     constructor(loc) {
         super(loc);
         this.loc = loc;
-        this.xOffset = this.loc.x * size + 0.1 * size;
-        this.yOffset = this.loc.y * size + 0.1 * size;
+        this.xOffset = this.loc.x * size;
+        this.yOffset = this.loc.y * size;
         this.size = size * 0.8;
         this.width = size * 0.8;
         this.height = size * 0.8;
@@ -109,7 +109,7 @@ class LocationDisplay extends AbstractDisplay {
 
     render(context, clr) {
         if (!this.loc.traversable) { return; }
-        makeRect(this.xOffset, this.yOffset, context, this.size, clr);
+        makeRect([this.xOffset, this.yOffset, 0], context, this.size, clr);
     }
 
     passiveDisplay(context, clr) {
@@ -159,7 +159,7 @@ class UnitDisplay extends AbstractDisplay {
     }
 
     get xOffsetTarget() {
-        return this.unit.loc.x * size + 0.2 * size;
+        return this.unit.loc.x * size;
     }
 
     get xOffset() {
@@ -179,7 +179,7 @@ class UnitDisplay extends AbstractDisplay {
     }
 
     get yOffsetTarget() {
-        return this.unit.loc.y * size + 0.2 * size
+        return this.unit.loc.y * size;
     }
 
     get yOffset() {
@@ -198,7 +198,7 @@ class UnitDisplay extends AbstractDisplay {
     render(context, clr, lfa) {
         const color = clr == undefined ? "black" : clr;
         const alpha = lfa == undefined ? 0.5 ** (this.unit.maxhp - this.unit.hp) : lfa;
-        makeRect(this.xOffset, this.yOffset, context, this.size, color, alpha);
+        makeRect([this.xOffset, this.yOffset, 0.5 * size], context, this.size, color, alpha);
     }
 
     passiveDisplay(context) {
@@ -241,8 +241,8 @@ class ActionDisplay extends AbstractDisplay {
 
     render(context, color) {
         context.fillStyle = color;
-        context.font = 0.8 * this.size + "px Trebuchet MS";
-        context.fillText(this.action.text, this.xOffset, this.yOffset);
+        // context.font = 0.8 * this.size + "px Trebuchet MS";
+        // context.fillText(this.action.text, this.xOffset, this.yOffset);
     }
 
     basicDisplay(context) {
@@ -343,10 +343,10 @@ class ConfirmationDisplay extends AbstractDisplay {
     }
 
     render(context, clr, lfa) {
-        makeRect(100, 50, context, 200, "white", 1);
-        context.fillStyle = "black";
-        context.font = 30 + "px Trebuchet MS";
-        context.fillText(this.confirmation.message, 100, 100);
+        makeRect([size, 0.5*size, 0], context, 200, "white", 1);
+        // context.fillStyle = "black";
+        // context.font = 30 + "px Trebuchet MS";
+        // context.fillText(this.confirmation.message, 100, 100);
     }
 
     passiveDisplay(context) {

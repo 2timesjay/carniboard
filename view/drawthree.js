@@ -8,7 +8,7 @@ var camera, scene, raycaster, renderer;
 var mouse = new THREE.Vector2(), INTERSECTED;
 var mouseClicked = false;
 var radius = 100, theta = 0;
-var WIDTH = 800, HEIGHT = 450;
+var WIDTH = 800, HEIGHT = 800;
 
 var _getCoords = function () {
     return (
@@ -37,6 +37,8 @@ var _getScene = function () {
     scene.add(light);
     var light = new THREE.DirectionalLight(0xffffff, 0.4);
     light.position.set(-1, -1, -1).normalize();
+    var light = new THREE.DirectionalLight(0xffffff, 0.7);
+    light.position.set(-4, -4, -12).normalize();
     scene.add(light);
     return scene;
 }
@@ -67,8 +69,11 @@ var _getCamera = function () {
     const near = 1;
     const far = 1000;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(5,5,5)
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    // const camera = new THREE.OrthographicCamera(-5, 5, -5, 5, -100, 100)
+    camera.position.set(4, 4, 12)
+    // camera.rotation.y=10/180 * Math.PI;
+    // camera.lookAt(new THREE.Vector3(5, 5, 0));
+    // controls.target = (new THREE.Vector3(5, 5, 0));
     return camera;
 }
 
@@ -146,7 +151,9 @@ function mouseRaycast(mouse, camera, scene) {
 }
 
 function render() {
-    camera.lookAt(scene.position);
+    // camera.lookAt(scene.position);
+    // controls.target = (new THREE.Vector3(4, 4, 0));
+    // controls.target = scene.position;
     camera.updateMatrixWorld();
     
     mouseRaycast(mouse, camera, scene);
@@ -168,12 +175,10 @@ var init = function (canvas) {
     raycaster = _getRaycaster();
     renderer = new THREE.WebGLRenderer({ canvas: renderCanvas});
     controls = _getControls(camera, renderer.domElement);
+    controls.target = (new THREE.Vector3(4, 4, 0));
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(WIDTH, HEIGHT);
     renderContext.scene = scene;
-    console.log(scene)
-    utilities.clear(renderContext);
-    scene = _populateSimpleScene(scene, _getCoords());
     document.addEventListener('mousemove', onDocumentMouseMove, false);
     document.addEventListener('click', onDocumentMouseClick, false); 
     // context.canvas.onmousemove = (event) => onDocumentMouseMove(event);
@@ -181,12 +186,21 @@ var init = function (canvas) {
     window.addEventListener('resize', onWindowResize, false);
 }
 
+var rebuild_scene = function(renderContext){
+    scene = renderContext.scene;
+    utilities.clear(renderContext);
+    scene = _populateSimpleScene(scene, _getCoords());
+    renderContext.scene = scene;
+}
+
 var redraw = function (context, state, triggerList, size) {
     let space = state.space;
     let stack = state.stack;
     let k = space.k;
-    utilities.clear(context) // Reset context
     const canvas = context.canvas;
+
+    // TODO: Change from clear to "update"
+    utilities.clear(context); // Reset context
 
     triggerList.splice(0, triggerList.length);
     function showSpace(space) {
@@ -239,7 +253,7 @@ var redraw = function (context, state, triggerList, size) {
             }
         }
     }
-    showSpace(space, stack);
+    showSpace(space);
     showInputStack(stack);
 }
 
@@ -251,6 +265,7 @@ var addListeners = function (context, triggerList) { // Add Listeners
     context.canvas.onclick = function (event) {
         triggerList.forEach(t => t(event));
     }
+    console.log(triggerList);
 }
 
 

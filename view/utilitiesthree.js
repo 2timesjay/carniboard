@@ -1,3 +1,6 @@
+
+var WIDTH = 800, HEIGHT = 800;
+
 var lerp = function*(rate, current, target, minTime) {
     /* linearly interpolate value from a to b over time t */
     let startTime = new Date().getTime();
@@ -33,7 +36,9 @@ var chain = function*(...gens) {
 
 function getGroup(scene) {
     objects = scene.children
+    if (objects.length === 0) { return null; }
     group = objects[objects.length - 1]
+    if (group.type !== "Group") { return null; }
     return group
 }
 
@@ -49,47 +54,61 @@ function clear(context){
     }
 
     var group = getGroup(context.scene);
-    clearThree(group);
+    if (group != null) {clearThree(group);}
 }
 
 function getMousePos(canvasDom, mouseEvent) {
     var rect = canvasDom.getBoundingClientRect();
+    var rect = mouseEvent.target.getBoundingClientRect();
     return {
-        x: mouseEvent.clientX - rect.left,
-        y: mouseEvent.clientY - rect.top
+        x: ((mouseEvent.clientX - rect.left) / WIDTH) * 2 - 1,
+        y: - ((mouseEvent.clientY - rect.top) / HEIGHT) * 2 + 1
     };
 }
 
-function makeRect(x, y, context, size, clr, lfa) {  // Make cuboid
-    const lfa = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
-    const clr = clr == undefined ? "#000000" : clr; 
+function makeRect(co, context, size, clr, lfa) {  // Make cuboid
+    const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
+    const color = clr == undefined ? "#000000" : clr; 
 
     let geometry = new THREE.CubeGeometry(size,size, size);
     // let blockMesh = new THREE.Mesh(geometry, material);
     let blockMesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: clr }));
-    blockMesh.position.x = x;
-    blockMesh.position.y = y;
-    blockMesh.position.z = 0;
+    blockMesh.position.x = co[0];
+    blockMesh.position.y = co[1];
+    blockMesh.position.z = co[2];
     blockMesh.coords = co;
-    scene.add(blockMesh);
+    getGroup(context.scene).add(blockMesh);
 }
 
 function makeCircle(x, y, context, size, clr, lfa) {
-    const alpha = lfa == undefined ? 1.0 : lfa;
+    const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
     const color = clr == undefined ? "#000000" : clr;
-    var centerX = x;
-    var centerY = y;
-    var radius = size;
 
-    context.globalAlpha = alpha;
-    context.beginPath();
-    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    context.fillStyle = color;
-    context.fill();
-    context.lineWidth = 5;
-    // context.strokeStyle = color;
-    // context.stroke();
-    context.globalAlpha = 1.0;
+    let geometry = new THREE.CircleGeometry(size/2.0, 32);
+    let circleMesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: clr }));
+    circleMesh.position.x = co[0];
+    circleMesh.position.y = co[1];
+    circleMesh.position.z = co[2];
+    circleMesh.coords = co;
+    getGroup(context.scene).add(circleMesh);
+}
+
+var loader = new THREE.FontLoader();
+
+function makeText(co, context, size, clr, lfa) {
+    loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
+
+        var geometry = new THREE.TextGeometry('Hello three.js!', {
+            font: font,
+            size: size,
+            height: 1,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 10,
+            bevelSize: 8,
+            bevelSegments: 5
+        });
+    });
 }
 
 module.exports = {

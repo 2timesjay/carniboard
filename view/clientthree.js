@@ -10,9 +10,8 @@ makeTicTacToe = require('../model/construction').makeTicTacToe;
 makeConnectFour = require('../model/construction').makeConnectFour;
 makeBasicTactics = require('../model/construction').makeBasicTactics;
 draw = require('../view/drawthree');
-// redraw = draw.redraw;
-// addListeners = draw.addListeners;
-// checkConfirmation = draw.checkConfirmation;
+redraw = draw.redraw;
+addListeners = draw.addListeners;
 
 timeline = require("../view/timelinethree");
 makeTimeline = timeline.makeTimeline;
@@ -105,12 +104,14 @@ var tl_canvas = draw.makeCanvas(k*size/2, k*size/2, true);
 var tl_render_fn = () => makeTimeline(context, tl, tl_images, tl_canvas);
 
 var loop = function() {
-    // redraw(context, state, triggerList, size);
-    // addListeners(context, triggerList);
-    // checkConfirmation(state, tl); // TODO: Timeline
+    redraw(context, state, triggerList, size);
+    addListeners(context, triggerList);
+    checkConfirmation(state, tl); // TODO: Timeline
     tl_render_fn();
 }
-loop();
+
+draw.init(canvas);
+draw.animate();
 
 canvas.addEventListener(
     'mousemove', 
@@ -120,6 +121,3 @@ canvas.addEventListener(
     'click',
     () => loop()
 );
-
-draw.init(canvas);
-draw.animate();

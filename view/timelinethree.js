@@ -17,7 +17,6 @@ makeTimeline = function (originalContext, timeline, timelineImages, timelineCanv
     // http://jsfiddle.net/mBzVR/2433/
     // canvas.setAttribute("style", "background-color:green")
     const tlen = timeline.length;
-    console.log(timelineImages);
     var width = originalContext.canvas.width;
     var height = originalContext.canvas.height;
     var scale = Math.min(0.25, 1.0 / tlen);
@@ -37,7 +36,7 @@ makeTimeline = function (originalContext, timeline, timelineImages, timelineCanv
             // .map((copied, i) => {
             //     ctx.drawImage(copied.canvas, width * i, 0)
             // });
-            .map((image, i) => { // Kinda works!
+            .map((image, i) => { // Kinda works! Flickers a lot on update
                 var img = new Image();
                 img.onload = function () {
                     ctx.drawImage(img, width*i, 0);
