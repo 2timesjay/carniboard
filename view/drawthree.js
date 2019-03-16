@@ -265,7 +265,6 @@ var addListeners = function (context, triggerList) { // Add Listeners
     context.canvas.onclick = function (event) {
         triggerList.forEach(t => t(event));
     }
-    console.log(triggerList);
 }
 
 

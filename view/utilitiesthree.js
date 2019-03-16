@@ -80,7 +80,7 @@ function makeRect(co, context, size, clr, lfa) {  // Make cuboid
     getGroup(context.scene).add(blockMesh);
 }
 
-function makeCircle(x, y, context, size, clr, lfa) {
+function makeCircle(co, context, size, clr, lfa) {
     const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
     const color = clr == undefined ? "#000000" : clr;
 
@@ -93,22 +93,32 @@ function makeCircle(x, y, context, size, clr, lfa) {
     getGroup(context.scene).add(circleMesh);
 }
 
-var loader = new THREE.FontLoader();
+function makeTexture() {
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute("width", 128);
+    canvas.setAttribute("height", 128);
+    const context = canvas.getContext("2d");
+    context.canvas.value = context;
+    context.fillStyle = 'purple';
+    context.fillRect(0, 0, 128, 128);
+    context.fillStyle = "orangered";
+    context.fillRect(32, 32, 64, 64);
+    return context;
+}
 
-function makeText(co, context, size, clr, lfa) {
-    loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
-
-        var geometry = new THREE.TextGeometry('Hello three.js!', {
-            font: font,
-            size: size,
-            height: 1,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 10,
-            bevelSize: 8,
-            bevelSegments: 5
-        });
-    });
+function makeText(co, context, text, size, clr, lfa) {
+    let texture = makeTexture();
+    texture.fillStyle = color;
+    texture.font = 32 + "px consolas";
+    texture.fillText(text, 0, 32);
+    let geometry = new THREE.PlaneGeometry(size, size);
+    textureMaterial = new THREE.MeshBasicMaterial();
+    textureMaterial.map = new THREE.CanvasTexture(makeTexture().canvas);
+    let mesh = new THREE.Mesh(geometry, textureMaterial);
+    mesh.position.x = co[0];
+    mesh.position.y = co[1];
+    mesh.position.z = co[2];
+    getGroup(context.scene).add(mesh);
 }
 
 module.exports = {
@@ -116,6 +126,7 @@ module.exports = {
     getMousePos: getMousePos,
     makeRect: makeRect,
     makeCircle: makeCircle,
+    makeText: makeText,
     clear: clear,
     getGroup: getGroup,
 }

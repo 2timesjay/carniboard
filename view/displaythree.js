@@ -2,8 +2,9 @@ const size = 1;
 
 utilities = require("../view/utilitiesthree");
 makeRect = utilities.makeRect;
-getMousePos = utilities.getMousePos;
 makeCircle = utilities.makeCircle;
+makeText = utilities.makeText;
+getMousePos = utilities.getMousePos;
 lerp = utilities.lerp;
 
 class AbstractDisplay {
@@ -240,9 +241,10 @@ class ActionDisplay extends AbstractDisplay {
     }
 
     render(context, color) {
-        context.fillStyle = color;
+        // context.fillStyle = color;
         // context.font = 0.8 * this.size + "px Trebuchet MS";
         // context.fillText(this.action.text, this.xOffset, this.yOffset);
+        makeText([this.xOffset, this.yOffset, 1 * size], context, this.action.text, this.size, color, 1);
     }
 
     basicDisplay(context) {
@@ -343,10 +345,11 @@ class ConfirmationDisplay extends AbstractDisplay {
     }
 
     render(context, clr, lfa) {
-        makeRect([size, 0.5*size, 0], context, 200, "white", 1);
+        // makeRect([size, 0.5*size, 0], context, 200, "white", 1);
         // context.fillStyle = "black";
         // context.font = 30 + "px Trebuchet MS";
         // context.fillText(this.confirmation.message, 100, 100);
+        makeText([this.xOffset, this.yOffset, 1 * size], context, this.confirmation.message, this.size, "black", 1);
     }
 
     passiveDisplay(context) {
