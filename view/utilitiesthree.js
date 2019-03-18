@@ -62,13 +62,12 @@ function getMouseTarget(canvasDom, mouseEvent) {
 }
 
 function makeRect(obj, co, context, size, clr, lfa) {  // Make cuboid
-    const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
-    const color = clr == undefined ? "#000000" : clr; 
 
     let geometry = new THREE.CubeGeometry(size,size, size);
     // let blockMesh = new THREE.Mesh(geometry, material);
     let mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
-        color: color
+        color: lr
+
     }));
     mesh.position.x = co[0];
     mesh.position.y = co[1];
