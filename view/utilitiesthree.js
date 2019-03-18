@@ -57,40 +57,39 @@ function clear(context){
     if (group != null) {clearThree(group);}
 }
 
-function getMousePos(canvasDom, mouseEvent) {
-    var rect = canvasDom.getBoundingClientRect();
-    var rect = mouseEvent.target.getBoundingClientRect();
-    return {
-        x: ((mouseEvent.clientX - rect.left) / WIDTH) * 2 - 1,
-        y: - ((mouseEvent.clientY - rect.top) / HEIGHT) * 2 + 1
-    };
+function getMouseTarget(canvasDom, mouseEvent) {
+    return mouseEvent.obj;
 }
 
-function makeRect(co, context, size, clr, lfa) {  // Make cuboid
+function makeRect(obj, co, context, size, clr, lfa) {  // Make cuboid
     const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
     const color = clr == undefined ? "#000000" : clr; 
 
     let geometry = new THREE.CubeGeometry(size,size, size);
     // let blockMesh = new THREE.Mesh(geometry, material);
-    let blockMesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: clr }));
-    blockMesh.position.x = co[0];
-    blockMesh.position.y = co[1];
-    blockMesh.position.z = co[2];
-    blockMesh.coords = co;
-    getGroup(context.scene).add(blockMesh);
+    let mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
+        color: color
+    }));
+    mesh.position.x = co[0];
+    mesh.position.y = co[1];
+    mesh.position.z = co[2];
+    mesh.coords = co;
+    mesh.obj = obj;
+    getGroup(context.scene).add(mesh);
 }
 
-function makeCircle(co, context, size, clr, lfa) {
+function makeCircle(obj, co, context, size, clr, lfa) {
     const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
     const color = clr == undefined ? "#000000" : clr;
 
     let geometry = new THREE.CircleGeometry(size/2.0, 32);
-    let circleMesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: clr }));
-    circleMesh.position.x = co[0];
-    circleMesh.position.y = co[1];
-    circleMesh.position.z = co[2];
-    circleMesh.coords = co;
-    getGroup(context.scene).add(circleMesh);
+    let mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: clr }));
+    mesh.position.x = co[0];
+    mesh.position.y = co[1];
+    mesh.position.z = co[2];
+    mesh.coords = co;
+    mesh.obj = obj;
+    getGroup(context.scene).add(mesh);
 }
 
 function makeTexture() {
@@ -99,31 +98,33 @@ function makeTexture() {
     canvas.setAttribute("height", 128);
     const context = canvas.getContext("2d");
     context.canvas.value = context;
-    context.fillStyle = 'purple';
+    context.fillStyle = 'darkslategrey';
     context.fillRect(0, 0, 128, 128);
-    context.fillStyle = "orangered";
-    context.fillRect(32, 32, 64, 64);
     return context;
 }
 
-function makeText(co, context, text, size, clr, lfa) {
+function makeText(obj, co, context, text, size, clr, lfa) {
+    const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
+    const color = clr == undefined ? "#000000" : clr;
     let texture = makeTexture();
     texture.fillStyle = color;
-    texture.font = 32 + "px consolas";
-    texture.fillText(text, 0, 32);
+    texture.font =  128 + "px consolas";
+    texture.fillText(text, 0, 128);
     let geometry = new THREE.PlaneGeometry(size, size);
     textureMaterial = new THREE.MeshBasicMaterial();
-    textureMaterial.map = new THREE.CanvasTexture(makeTexture().canvas);
+    textureMaterial.map = new THREE.CanvasTexture(texture.canvas);
     let mesh = new THREE.Mesh(geometry, textureMaterial);
     mesh.position.x = co[0];
     mesh.position.y = co[1];
     mesh.position.z = co[2];
+    mesh.coords = co;
+    mesh.obj = obj;
     getGroup(context.scene).add(mesh);
 }
 
 module.exports = {
     lerp: lerp,
-    getMousePos: getMousePos,
+    getMouseTarget: getMouseTarget,
     makeRect: makeRect,
     makeCircle: makeCircle,
     makeText: makeText,

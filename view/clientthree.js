@@ -12,6 +12,7 @@ makeBasicTactics = require('../model/construction').makeBasicTactics;
 draw = require('../view/drawthree');
 redraw = draw.redraw;
 addListeners = draw.addListeners;
+checkConfirmation = draw.checkConfirmation;
 
 timeline = require("../view/timelinethree");
 makeTimeline = timeline.makeTimeline;
@@ -19,55 +20,6 @@ createTimelineController = timeline.createTimelineController;
 
 wiring = require("../utilities/wiring.js")
 ListView = wiring.ListView;
-
-
-// Very detacted from draw/display. Fits Controller.
-var checkConfirmation = function (state, timelineView) {
-    let space = state.space
-    let stack = state.stack;
-    let digestFnGetter = state.digestFnGetter;
-    let topSel = stack[stack.length - 1].getNextSelection(space);
-    if (topSel.length > 0 && topSel[0].constructor.name == "Confirmation" && !topSel[0].isEnd) {
-        console.log("CONFIRMED: ", stack);
-        let digestFn = digestFnGetter(stack);
-        let effects = digestFn(stack);
-        while (stack.length > 1) {
-            let top = stack[stack.length - 1];
-            top.display._deselect(stack);
-        }
-        executed_effects = execute(effects, space);
-        // TODO: Ensure counters pushed to timeline properly
-        console.log("Post Execution: ", state);
-        if (timelineView != undefined) {
-            timelineView.push(executed_effects); // INTERFACE
-            console.log("Timeline: ", timelineView);
-        }
-        return true;
-    }
-    return false;
-}
-
-// Very detacted from draw/display. Fits Controller.
-var execute = function (effects, space) {  // Clarify as "requestExecution"
-    var effectToPromise = function (effect) { // TODO: This is incomprehensible
-        return () => {
-            let effectPromise = new Promise((resolve, reject) => {
-                let duration = effect.animationDuration();
-                let result = effect.execute(space);
-                let executeAndAnimate = setTimeout(() => {
-                    clearTimeout(executeAndAnimate);
-                    resolve(result);
-                    console.log("PROMISED: ", duration, effect);
-                }, duration)
-            })
-            return effectPromise;
-        }
-    }
-
-    var executionPromise = effects.reduce((prev, cur) => prev.then(effectToPromise(cur)), Promise.resolve());
-    //executionPromise.then();
-    return effects;
-}
 
 // /* Tic Tac Toe specific setup */
 // const k = 3;
@@ -110,8 +62,8 @@ var loop = function() {
     tl_render_fn();
 }
 
-draw.init(canvas);
-draw.animate();
+draw.glinit(canvas);
+draw.glanimate();
 
 canvas.addEventListener(
     'mousemove', 

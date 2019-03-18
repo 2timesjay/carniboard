@@ -6,7 +6,6 @@ utilities = require('../view/utilitiesthree')
 var container;
 var camera, scene, raycaster, renderer;
 var mouse = new THREE.Vector2(), INTERSECTED;
-var mouseClicked = false;
 var radius = 100, theta = 0;
 var WIDTH = 800, HEIGHT = 800;
 
@@ -123,11 +122,10 @@ function onDocumentMouseMove(event) {
 }
 function onDocumentMouseClick(event) {
     event.preventDefault();
-    mouseClicked = !mouseClicked;
 }
 
-var animate = function() {
-    requestAnimationFrame(animate);
+var glanimate = function() {
+    requestAnimationFrame(glanimate);
     render();
 }
 
@@ -138,16 +136,17 @@ function mouseRaycast(mouse, camera, scene) {
     var intersects = raycaster.intersectObjects(group.children);
     if (intersects.length > 0) {
         if (INTERSECTED != intersects[0].object) {
-            if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+            // if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
             INTERSECTED = intersects[0].object;
-            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+            // INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
         }
-        color = mouseClicked ? 0xff0000 : 0x00ff00;
-        INTERSECTED.material.emissive.setHex(color);
+        // color = 0x00ff00;
+        // INTERSECTED.material.emissive.setHex(color);
     } else {
-        if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-        INTERSECTED = null;
+        // if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+        // INTERSECTED = null;
     }
+    return INTERSECTED;
 }
 
 function render() {
@@ -163,7 +162,7 @@ function render() {
 }
 
 
-var init = function (canvas) {
+var glinit = function (canvas) {
     // Rendering Canvas
     renderCanvas = canvas
     renderContext = renderCanvas.getContext("webgl");
@@ -260,19 +259,72 @@ var redraw = function (context, state, triggerList, size) {
 
 var addListeners = function (context, triggerList) { // Add Listeners
     context.canvas.onmousemove = function (event) {
+        // console.log(INTERSECTED);
+        event.obj = INTERSECTED.obj;
         triggerList.forEach(t => t(event));
     }
     context.canvas.onclick = function (event) {
+        console.log("Interesected", INTERSECTED, INTERSECTED.obj);
+        event.obj = INTERSECTED.obj;
         triggerList.forEach(t => t(event));
     }
 }
 
 
+// Very detached from draw/display. Fits Controller.
+var checkConfirmation = function (state, timelineView) {
+    let space = state.space
+    let stack = state.stack;
+    let digestFnGetter = state.digestFnGetter;
+    let topSel = stack[stack.length - 1].getNextSelection(space);
+    if (topSel.length > 0 && topSel[0].constructor.name == "Confirmation" && !topSel[0].isEnd) {
+        console.log("CONFIRMED: ", stack);
+        let digestFn = digestFnGetter(stack);
+        let effects = digestFn(stack);
+        while (stack.length > 1) {
+            let top = stack[stack.length - 1];
+            top.display._deselect(stack);
+        }
+        executed_effects = execute(effects, space);
+        // TODO: Ensure counters pushed to timeline properly
+        console.log("Post Execution: ", state);
+        if (timelineView != undefined) {
+            timelineView.push(executed_effects); // INTERFACE
+            console.log("Timeline: ", timelineView);
+        }
+        return true;
+    }
+    return false;
+}
+
+// Very detacted from draw/display. Fits Controller.
+var execute = function (effects, space) { // Clarify as "requestExecution"
+    var effectToPromise = function (effect) { // TODO: This is incomprehensible
+        return () => {
+            let effectPromise = new Promise((resolve, reject) => {
+                let duration = effect.animationDuration();
+                let result = effect.execute(space);
+                let executeAndAnimate = setTimeout(() => {
+                    clearTimeout(executeAndAnimate);
+                    resolve(result);
+                    console.log("PROMISED: ", duration, effect);
+                }, duration)
+            })
+            return effectPromise;
+        }
+    }
+
+    var executionPromise = effects.reduce((prev, cur) => prev.then(effectToPromise(cur)), Promise.resolve());
+    //executionPromise.then();
+    return effects;
+}
+
 
 module.exports = {
     redraw: redraw,
     addListeners: addListeners,
+    checkConfirmation: checkConfirmation,
     makeCanvas: makeCanvas,
-    init: init, // TODO: Remove
-    animate: animate, //TODO: Remove
+    glinit: glinit, // TODO: Remove
+    glanimate: glanimate, //TODO: Remove
 }

@@ -4,7 +4,7 @@ utilities = require("../view/utilitiesthree");
 makeRect = utilities.makeRect;
 makeCircle = utilities.makeCircle;
 makeText = utilities.makeText;
-getMousePos = utilities.getMousePos;
+getMouseTarget = utilities.getMouseTarget;
 lerp = utilities.lerp;
 
 class AbstractDisplay {
@@ -33,7 +33,8 @@ class AbstractDisplay {
     selectDisplay(context) {
     }
 
-    isHit(mousePos) {
+    isHit(mouseTarget) {
+        return this === mouseTarget;
     }
 
     _select(stack) { // INTERFACE
@@ -61,10 +62,9 @@ class AbstractDisplay {
         let context = canvas.getContext("webgl");
         let self = this;
         let trigger = function (e) {
-            // console.log("Expended? ",e.expended);
             if (e.type == "click") {
-                let mousePos = getMousePos(canvas, e);
-                if (self.isHit(mousePos)) {
+                let mouseTarget = getMouseTarget(canvas, e);
+                if (self.isHit(mouseTarget)) {
                     self._select(stack);
                     return true;
                 } else {
@@ -82,8 +82,8 @@ class AbstractDisplay {
         let self = this;
         let trigger = function (e) {
             if (e.type == "mousemove" && !self.select) {
-                let mousePos = getMousePos(canvas, e);
-                if (self.isHit(mousePos)) {
+                let mouseTarget = getMouseTarget(canvas, e);
+                if (self.isHit(mouseTarget)) {
                     self.preview = true;
                     return true;
                 } else {
@@ -110,7 +110,7 @@ class LocationDisplay extends AbstractDisplay {
 
     render(context, clr) {
         if (!this.loc.traversable) { return; }
-        makeRect([this.xOffset, this.yOffset, 0], context, this.size, clr);
+        makeRect(this, [this.xOffset, this.yOffset, 0], context, this.size, clr);
     }
 
     passiveDisplay(context, clr) {
@@ -119,25 +119,15 @@ class LocationDisplay extends AbstractDisplay {
     }
 
     basicDisplay(context) {
-        this.render(context, 'grey');
+        this.render(context, 'yellow');
     }
 
     previewDisplay(context) {
-        this.render(context, 'yellow');
+        this.render(context, 'orange');
     }
 
     selectedDisplay(context) {
         this.render(context, 'red');
-    }
-
-    isHit(mousePos) {
-        if (mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.width) {
-            if (mousePos.y >= this.yOffset && mousePos.y < this.yOffset + this.height) {
-                return true;
-            }
-        } else {
-            return false;
-        }
     }
 }
 
@@ -156,7 +146,7 @@ class UnitDisplay extends AbstractDisplay {
     }
 
     xGenReset() {
-        this.xOffsetGen = lerp(100, this.xOffsetCurrent, this.xOffsetTarget);
+        this.xOffsetGen = lerp(1.0, this.xOffsetCurrent, this.xOffsetTarget);
     }
 
     get xOffsetTarget() {
@@ -176,7 +166,7 @@ class UnitDisplay extends AbstractDisplay {
     }
 
     yGenReset() {
-        this.yOffsetGen = lerp(100, this.yOffsetCurrent, this.yOffsetTarget);
+        this.yOffsetGen = lerp(1.0, this.yOffsetCurrent, this.yOffsetTarget);
     }
 
     get yOffsetTarget() {
@@ -199,7 +189,7 @@ class UnitDisplay extends AbstractDisplay {
     render(context, clr, lfa) {
         const color = clr == undefined ? "black" : clr;
         const alpha = lfa == undefined ? 0.5 ** (this.unit.maxhp - this.unit.hp) : lfa;
-        makeRect([this.xOffset, this.yOffset, 0.5 * size], context, this.size, color, alpha);
+        makeRect(this, [this.xOffset, this.yOffset, 0.5 * size], context, this.size, color, alpha);
     }
 
     passiveDisplay(context) {
@@ -207,21 +197,15 @@ class UnitDisplay extends AbstractDisplay {
     }
 
     basicDisplay(context) {
-        this.render(context, 'black');
+        this.render(context, 'yellow');
     }
 
     previewDisplay(context) {
-        this.render(context, 'yellow');
+        this.render(context, 'orange');
     }
 
     selectDisplay(context) {
         this.render(context, 'red');
-    }
-
-    isHit(mousePos) {
-        var inXBounds = mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.size;
-        var inYBounds = mousePos.y >= this.yOffset && mousePos.y < this.yOffset + this.size;
-        return inXBounds && inYBounds;
     }
 }
 
@@ -244,25 +228,19 @@ class ActionDisplay extends AbstractDisplay {
         // context.fillStyle = color;
         // context.font = 0.8 * this.size + "px Trebuchet MS";
         // context.fillText(this.action.text, this.xOffset, this.yOffset);
-        makeText([this.xOffset, this.yOffset, 1 * size], context, this.action.text, this.size, color, 1);
+        makeText(this, [this.xOffset, this.yOffset, 1 * size], context, this.action.text, this.size, color, 1);
     }
 
     basicDisplay(context) {
-        this.render(context, 'black');
+        this.render(context, 'yellow');
     }
 
     previewDisplay(context) {
-        this.render(context, 'yellow');
+        this.render(context, 'orange');
     }
 
     selectDisplay(context) {
         this.render(context, 'red');
-    }
-
-    isHit(mousePos) {
-        var inXBounds = mousePos.x >= this.xOffset && mousePos.x < this.xOffset + this.size;
-        var inYBounds = mousePos.y >= this.yOffset - this.size && mousePos.y < this.yOffset;
-        return inXBounds && inYBounds;
     }
 }
 
@@ -276,11 +254,16 @@ class PathDisplay extends AbstractDisplay {
     }
 
     basicDisplay(context) {
-        const color = 'yellow';
-        const alpha = 0.5
-        const dest = this.path.destination;
-        makeCircle(dest.x * this.size + 0.5 * this.size, dest.y * this.size + 0.5 * this.size, context, 0.2 * this.size, color, alpha);
-    }
+        const loc = this.path.destination;
+        console.log("Desination: ", loc);
+        let self = this;
+        let co = [
+            loc.x * self.size,
+            loc.y * self.size,
+            1.5 * size
+        ];
+        makeCircle(self, co, context, 0.4 * self.size, 'yellow', 1.0);
+   }
 
     previewDisplay(context) {
         let locations = [this.path.origin].concat(this.path.locations)
@@ -292,19 +275,20 @@ class PathDisplay extends AbstractDisplay {
                 const dx = loc.x - prev_loc.x;
                 const dy = loc.y - prev_loc.y;
 
-                context.globalAlpha = 0.5;
-                context.beginPath();
-                context.fillStyle = 'red';
-                context.fill();
-                context.lineWidth = 0.4 * self.size;
-                context.moveTo(prev_loc.x * self.size + 0.5 * self.size, prev_loc.y * self.size + 0.5 * self.size);
-                context.lineTo(loc.x * self.size + 0.5 * self.size, loc.y * self.size + 0.5 * self.size);
-                context.strokeStyle = 'yellow';
-                context.stroke();
-                context.globalAlpha = 1.0;
+                let co = [
+                    prev_loc.x * self.size + 0.5 * dx * size,
+                    prev_loc.y * self.size + 0.5 * dy * size,
+                    1.5 * size
+                ];
+                makeRect(self, co, context, 0.2 * self.size, 'orange', 1.0);
             }
             // Draw circle in middle of grid squares.
-            makeCircle(loc.x * self.size + 0.5 * self.size, loc.y * self.size + 0.5 * self.size, context, 0.2 * self.size, 'yellow', 0.5);
+            let co = [
+                loc.x * self.size,
+                loc.y * self.size,
+                1.5*size
+            ];
+            makeCircle(self, co, context, 0.4 * self.size, 'orange', 1.0);
         });
     }
 
@@ -317,24 +301,26 @@ class PathDisplay extends AbstractDisplay {
                 const prev_loc = locations[i - 1];
                 const dx = loc.x - prev_loc.x;
                 const dy = loc.y - prev_loc.y;
-
-                context.beginPath();
-                context.fillStyle = 'red';
-                context.fill();
-                context.lineWidth = 0.4 * self.size;
-                context.moveTo(prev_loc.x * self.size + 0.5 * self.size, prev_loc.y * self.size + 0.5 * self.size);
-                context.lineTo(loc.x * self.size + 0.5 * self.size, loc.y * self.size + 0.5 * self.size);
-                context.strokeStyle = 'red';
-                context.stroke();
-                context.globalAlpha = 1.0;
+                
+                let co = [
+                    prev_loc.x * self.size + 0.5 * dx * size,
+                    prev_loc.y * self.size + 0.5 * dy * size,
+                    1.5 * size
+                ];
+                makeRect(self, co, context, 0.2 * self.size, 'red', 1.0);
             }
             // Draw circle in middle of grid squares.
-            makeCircle(loc.x * self.size + 0.5 * self.size, loc.y * self.size + 0.5 * self.size, context, 0.2 * self.size, 'red', 1.0);
+            let co = [
+                loc.x * self.size,
+                loc.y * self.size,
+                1.5 * size
+            ];
+            makeCircle(self, co, context, 0.4 * self.size, 'red', 1.0);
         });
     }
 
-    isHit(mousePos) {
-        return this.path.destination.display.isHit(mousePos);
+    isHit(mouseTarget) {
+        return this.path.destination.display.isHit(mouseTarget);
     }
 }
 
@@ -349,7 +335,7 @@ class ConfirmationDisplay extends AbstractDisplay {
         // context.fillStyle = "black";
         // context.font = 30 + "px Trebuchet MS";
         // context.fillText(this.confirmation.message, 100, 100);
-        makeText([this.xOffset, this.yOffset, 1 * size], context, this.confirmation.message, this.size, "black", 1);
+        makeText(this, [this.xOffset, this.yOffset, 1 * size], context, this.confirmation.message, this.size, "black", 1);
     }
 
     passiveDisplay(context) {
@@ -357,18 +343,15 @@ class ConfirmationDisplay extends AbstractDisplay {
     }
 
     basicDisplay(context) {
-        this.render(context, 'black');
+        this.render(context, 'yellow');
     }
 
     previewDisplay(context) {
-        this.render(context, 'yellow');
+        this.render(context, 'orange');
     }
 
     selectDisplay(context) {
         this.render(context, 'red');
-    }
-
-    isHit(mousePos) {
     }
 
 }
