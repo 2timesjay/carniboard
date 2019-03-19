@@ -61,11 +61,13 @@ function getMouseTarget(canvasDom, mouseEvent) {
     return mouseEvent.obj;
 }
 
-function makeRect(obj, co, context, size, clr, lfa) {  // Make cuboid
+function makeRect(obj, co, context, size, clr, lfa) { // Make cuboid
+    const alpha = lfa == undefined ? 1.0 : lfa; // Alpha not yet used.
 
     let geometry = new THREE.CubeGeometry(size,size, size);
     // let blockMesh = new THREE.Mesh(geometry, material);
-    let mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
+    let mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+        opacity: alpha,
         color: clr
     }));
     mesh.position.x = co[0];
@@ -81,7 +83,10 @@ function makeCircle(obj, co, context, size, clr, lfa) {
     const color = clr == undefined ? "#000000" : clr;
 
     let geometry = new THREE.CircleGeometry(size/2.0, 32);
-    let mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: clr }));
+    let mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ 
+        color: clr,
+        opacity: alpha,
+    }));
     mesh.position.x = co[0];
     mesh.position.y = co[1];
     mesh.position.z = co[2];

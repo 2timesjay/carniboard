@@ -110,7 +110,7 @@ class LocationDisplay extends AbstractDisplay {
 
     render(context, clr) {
         if (!this.loc.traversable) { return; }
-        makeRect(this, [this.xOffset, this.yOffset, 0], context, this.size, clr);
+        makeRect(this, [this.xOffset, this.yOffset, 0], context, this.size, clr, 1.0);
     }
 
     passiveDisplay(context, clr) {
@@ -262,7 +262,7 @@ class PathDisplay extends AbstractDisplay {
             loc.y * self.size,
             1.5 * size
         ];
-        makeCircle(self, co, context, 0.4 * self.size, 'yellow', 1.0);
+        makeCircle(self, co, context, 0.4 * self.size, 'yellow', 0.75);
    }
 
     previewDisplay(context) {
