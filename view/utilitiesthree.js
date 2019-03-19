@@ -66,8 +66,7 @@ function makeRect(obj, co, context, size, clr, lfa) {  // Make cuboid
     let geometry = new THREE.CubeGeometry(size,size, size);
     // let blockMesh = new THREE.Mesh(geometry, material);
     let mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
-        color: lr
-
+        color: clr
     }));
     mesh.position.x = co[0];
     mesh.position.y = co[1];
