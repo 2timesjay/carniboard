@@ -128,6 +128,12 @@ class BaseUnit extends AbstractEntity { // isa Entity
     }
 }
 
+class CheckerPiece extends BaseUnit { // isa Entity
+    constructor(name, loc, team, stats) {
+        super(stats || {}, name, loc, team, [CheckersMoveAction]);
+    }
+}
+
 class Unit extends BaseUnit { // isa Entity
     constructor(name, loc, team, stats) {
         super(stats || {}, name, loc, team, [MoveAction, AttackAction, ReadyCounterAction]);
@@ -167,6 +173,25 @@ class Action extends AbstractEntity {
 
     clearNextSelection() {
         this.nextSelection = undefined;
+    }
+}
+
+class CheckersMoveAction extends Action {
+    constructor(index, contextUnit) {
+        const digestFn = function (stack) {
+            let u = stack[1];
+            let paths = stack.slice(2).filter(p => (p.constructor.name == "Path"));
+            return paths.map(p => new MoveEffect(u, p.destination)).concat([new EndTurnEffect()]);
+        }
+        super("CMOVE", "CM", () => {}, digestFn, index); //nextSelFn, digestFn
+        this.unit = contextUnit;
+    }
+
+    regenerateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
+        console.log("REGENERATE CHECKERS MOVE NEXT_SEL");
+        this.nextSelection = contextSpace
+            .getReachable(this.unit.loc, 1, [[1,1], [-1, 1], [-1, -1]])
+            .map(dest => new Path(this.unit.loc, dest, contextSpace, 1));
     }
 }
 
@@ -277,7 +302,6 @@ class BaseControlQueue extends AbstractEntity {
 class TicTacToeControlQueue extends BaseControlQueue {
     constructor() {
         super()
-        // this.nextSelection = contextSpace.locations.flatMap(l => l);
     }
 
     calculateNext(contextSpace) {
@@ -288,13 +312,23 @@ class TicTacToeControlQueue extends BaseControlQueue {
 class ConnectFourControlQueue extends BaseControlQueue {
     constructor() {
         super()
-        // this.nextSelection = contextSpace.locations.flatMap(l => l);
     }
 
     calculateNext(contextSpace) {
         return Array.from(difference(new Set(contextSpace.locations.flatMap(l => l)), new Set(contextSpace.units.map(u => u.loc))));
     }
 }
+
+class CheckersControlQueue extends BaseControlQueue {
+    constructor() {
+        super()
+    }
+
+    calculateNext(contextSpace) {
+        return contextSpace.units.filter(u => u.team == contextSpace.state.team);
+    }
+}
+
 
 class BasicTacticsControlQueue extends BaseControlQueue {
     constructor() {
@@ -308,7 +342,9 @@ class BasicTacticsControlQueue extends BaseControlQueue {
 
 module.exports = {
     Unit: Unit,
+    CheckerPiece: CheckerPiece,
     Location: Location,
+    CheckersControlQueue: CheckersControlQueue,
     TicTacToeControlQueue: TicTacToeControlQueue,
     ConnectFourControlQueue: ConnectFourControlQueue,
     BasicTacticsControlQueue: BasicTacticsControlQueue,

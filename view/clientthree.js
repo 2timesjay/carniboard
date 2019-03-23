@@ -9,6 +9,7 @@ console.log("Starting");
 makeTicTacToe = require('../model/construction').makeTicTacToe;
 makeConnectFour = require('../model/construction').makeConnectFour;
 makeBasicTactics = require('../model/construction').makeBasicTactics;
+makeCheckers = require('../model/construction').makeCheckers;
 draw = require('../view/drawthree');
 redraw = draw.redraw;
 addListeners = draw.addListeners;

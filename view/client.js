@@ -21,6 +21,11 @@ createTimelineController = timeline.createTimelineController;
 wiring = require("../utilities/wiring.js")
 ListView = wiring.ListView;
 
+/* Checkers specific setup */
+const k = 4;
+const size = 100;
+const buildState = makeCheckers;
+
 /* Tic Tac Toe specific setup */
 // const k = 3;
 // const size = 100;
@@ -32,9 +37,9 @@ ListView = wiring.ListView;
 // const buildState = makeConnectFour;
 
 // /* Basic Tactics specific setup */
-const k = 8;
-const size = 100;
-const buildState = makeBasicTactics;
+// const k = 8;
+// const size = 100;
+// const buildState = makeBasicTactics;
 
 /* Generic setup */
 const canvas = draw.makeCanvas(k * 100, k * size, true);

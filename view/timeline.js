@@ -16,7 +16,6 @@ makeTimeline = function (originalContext, timeline, timelineImages, canvas) {
     // https://stackoverflow.com/questions/3420975/html5-canvas-zooming
     // http://jsfiddle.net/mBzVR/2433/
     // canvas.setAttribute("style", "background-color:green")
-    console.log("Building Timeline")
     const tlen = timeline.length;
     var width = originalContext.canvas.width;
     var height = originalContext.canvas.height;
@@ -38,7 +37,6 @@ makeTimeline = function (originalContext, timeline, timelineImages, canvas) {
     canvas.setAttribute("width", (tlen + 1) * width * scale);
     const context = canvas.getContext("2d");
     const imageData = originalContext.getImageData(0, 0, width, height);
-    console.log(imageData);
     if (timelineImages.length <= tlen) {
         timelineImages.push(imageData);
     } else {

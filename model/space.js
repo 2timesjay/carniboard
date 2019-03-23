@@ -18,48 +18,37 @@ class Space {
         this.units = units;
     }
 
-    getAdjacent(loc) { // (loc: Location): Location[]
+    getAdjacent(loc, nh) { // (loc: Location): Location[]
+        let neighborhood = nh == null ? [[1, 0], [0, 1],  [-1, 0], [0, -1]] : nh;
         function isValidLoc(adj) { return adj != undefined && adj.traversable; }
         const x = loc.x;
         const y = loc.y;
+        // TODO: Use neighborhood
         let adjList = []
-        let row = this.locations[y - 1];
-        if (row != undefined) {
-            let adj = row[x];
-            if (isValidLoc(adj)) {
-                adjList.push(adj);
-            }
-        }
-        row = this.locations[y + 1];
-        if (row != undefined) {
-            let adj = row[x];
-            if (isValidLoc(adj)) {
-                adjList.push(adj);
-            }
-        }
-
-        row = this.locations[y];
-        if (row != undefined) {
-            let adj = row[x - 1];
-            if (isValidLoc(adj)) {
-                adjList.push(adj);
-            }
-            adj = row[x + 1];
-            if (isValidLoc(adj)) {
-                adjList.push(adj);
+        for (let i = 0; i < neighborhood.length; i++) {
+            let delta = neighborhood[i]
+            let dy = delta[0];
+            let dx = delta[1];
+            let row = this.locations[y + dy];
+            if (row != undefined) {
+                let adj = row[x + dx];
+                if (isValidLoc(adj)) {
+                    adjList.push(adj);
+                }
             }
         }
         return adjList;
     }
 
-    getReachable(loc, range) { //(loc: Location, range: int): Location[] 
+    getReachable(loc, range, nh) { 
+        // (loc: Location, range: int): Location[] 
         // TODO: Should this enumerate paths?
         let reached = new Set([loc]);
         let next = new Set();
         let frontier = new Set([...reached]);
         let self = this;
         for (let i = 1; i <= range; i++) {
-            next = Array.from(frontier).flatMap(l => self.getAdjacent(l));
+            next = Array.from(frontier).flatMap(l => self.getAdjacent(l, nh));
             frontier = difference(next, frontier);
             reached = union(reached, next);
         }

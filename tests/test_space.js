@@ -38,6 +38,20 @@ test('getAdjacent', function (t) {
     )
 });
 
+test('getAdjacentCustomNeighborhood', function (t) {
+    t.plan(2);
+
+    t.deepEquals(
+        [locations[1][0]],
+        space.getAdjacent(locations[0][0])
+    );
+
+    t.deepEquals(
+        new Set([locations[3][1], locations[3][3], locations[2][2]]),
+        new Set(space.getAdjacent(locations[3][2])),
+    )
+});
+
 test('getReachable', function (t) {
     t.plan(4);
     t.deepEquals(

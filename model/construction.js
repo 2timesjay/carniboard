@@ -3,6 +3,7 @@ intersection = utilities.intersection;
 
 entity = require('../model/entity')
 Unit = entity.Unit
+CheckerPiece = entity.CheckerPiece
 Location = entity.Location
 TicTacToeControlQueue = entity.TicTacToeControlQueue
 ConnectFourControlQueue = entity.ConnectFourControlQueue
@@ -243,8 +244,77 @@ makeBasicTactics = function() {
     return state;
 }
 
+makeCheckers = function () {
+    let locations = [
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+    ].map(
+        (row, y) => row.map(
+            (loc, x) => new Location(x, y, loc)
+        ));
+    let units = [{
+            'loc': [0, 0],
+            'name': 'red1',
+            'team': 0
+        },
+        {
+            'loc': [2, 0],
+            'name': 'red2',
+            'team': 0
+        },
+        {
+            'loc': [1, 3],
+            'name': 'black1',
+            'team': 1
+        },
+        {
+            'loc': [3, 3],
+            'name': 'black2',
+            'team': 1
+        }
+    ].map(u => new CheckerPiece(u.name, locations[u.loc[1]][u.loc[0]], u.team));
+    
+    let space = new Space(locations, units, 8);
+    let teamDead = function (team) {
+        let aliveUnits = team.filter(u => u.isAlive());
+        return aliveUnits.length == 0;
+    };
+    gameEndConfirmation = function (spc) {
+        let t0 = spc.units.filter(u => u.team == 0);
+        let t1 = spc.units.filter(u => u.team == 1);
+        if (teamDead(t0) || teamDead(t1)) {
+            return [new Confirmation(undefined, "GAME OVER", true)];
+        } else {
+            return [];
+        };
+    };
+    digestFnGetter = function (stack) { // stack => (stack => Effect[])
+        let action = stack[2];
+        return action.digestFn;
+    };
+
+    scoreFn = function (state) {
+        let spc = state.space;
+        let curTeam = spc.units.filter(u => u.team == state.team);
+        let otherTeam = spc.units.filter(u => u.team == 1 - state.team);
+        if (teamDead(otherTeam)) {
+            return 1;
+        } else if (teamDead(curTeam)) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+    stack = [new BasicTacticsControlQueue()];
+    state = new State(space, stack, gameEndConfirmation, digestFnGetter);
+    return state;
+}
+
 module.exports = {
     makeTicTacToe: makeTicTacToe,
     makeConnectFour: makeConnectFour,
-    makeBasicTactics: makeBasicTactics
+    makeBasicTactics: makeBasicTactics,
+    makeCheckers: makeCheckers
 }

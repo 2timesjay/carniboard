@@ -371,9 +371,11 @@ class ConfirmationDisplay extends AbstractDisplay {
 }
 
 module.exports = {
+    CheckerPiece: UnitDisplay, // TODO: Many-to-one display cleanup
     Unit: UnitDisplay,
     Location: LocationDisplay,
     Path: PathDisplay,
+    CheckersMoveAction: ActionDisplay,
     MoveAction: ActionDisplay,
     AttackAction: ActionDisplay,
     ReadyCounterAction: ActionDisplay,
