@@ -76,3 +76,5 @@ canvas.addEventListener(
     'click',
     () => loop()
 );
+
+setInterval(loop, 10);

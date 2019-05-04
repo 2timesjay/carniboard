@@ -177,6 +177,8 @@ class Action extends AbstractEntity {
 }
 
 class CheckersMoveAction extends Action {
+
+
     constructor(index, contextUnit) {
         const digestFn = function (stack) {
             let u = stack[1];
@@ -185,12 +187,13 @@ class CheckersMoveAction extends Action {
         }
         super("CMOVE", "CM", () => {}, digestFn, index); //nextSelFn, digestFn
         this.unit = contextUnit;
+        this.nh = this.unit.team == 0 ? [[1, -1], [1, 1]] : [[-1, -1], [-1, 1]];
     }
 
     regenerateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
         console.log("REGENERATE CHECKERS MOVE NEXT_SEL");
         this.nextSelection = contextSpace
-            .getReachable(this.unit.loc, 1, [[1,1], [-1, 1], [-1, -1]])
+            .getReachable(this.unit.loc, 1, this.nh)
             .map(dest => new Path(this.unit.loc, dest, contextSpace, 1));
     }
 }

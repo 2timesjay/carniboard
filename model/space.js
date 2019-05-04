@@ -40,6 +40,10 @@ class Space {
         return adjList;
     }
 
+    isOccupied(loc) {
+        return this.units.filter(u => u.loc == loc).length > 0;
+    }
+
     getReachable(loc, range, nh) { 
         // (loc: Location, range: int): Location[] 
         // TODO: Should this enumerate paths?
@@ -48,7 +52,7 @@ class Space {
         let frontier = new Set([...reached]);
         let self = this;
         for (let i = 1; i <= range; i++) {
-            next = Array.from(frontier).flatMap(l => self.getAdjacent(l, nh));
+            next = Array.from(frontier).flatMap(l => self.getAdjacent(l, nh)).filter(l => !self.isOccupied(l));
             frontier = difference(next, frontier);
             reached = union(reached, next);
         }

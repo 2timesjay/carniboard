@@ -54,7 +54,7 @@ class MoveEffect extends Effect {
     }
 
     animationDuration() {
-        return 1000* (Math.abs(this.unit.loc.x - this.destination.x) + Math.abs(this.unit.loc.y - this.destination.y));
+        return 500* (Math.abs(this.unit.loc.x - this.destination.x) + Math.abs(this.unit.loc.y - this.destination.y));
     }
 }
 
