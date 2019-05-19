@@ -176,6 +176,26 @@ class Action extends AbstractEntity {
     }
 }
 
+class MoveAction extends Action {
+    constructor(index, contextUnit) {
+        const digestFn = function (stack) {
+            let u = stack[1];
+            let paths = stack.slice(2).filter(p => (p.constructor.name == "Path"));
+            return paths.map(p => new MoveEffect(u, p.destination)).concat([new EndTurnEffect()]);
+        }
+        super("MOVE", "M", () => { }, digestFn, index); //nextSelFn, digestFn
+        this.unit = contextUnit;
+    }
+
+    regenerateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
+        console.log("REGENERATE MOVE NEXT_SEL");
+        // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
+        this.nextSelection = contextSpace
+            .getReachable(this.unit.loc, this.unit.range)
+            .map(dest => new Path(this.unit.loc, dest, contextSpace, this.unit.range));
+    }
+}
+
 class CheckersMoveAction extends Action {
 
 
@@ -192,26 +212,10 @@ class CheckersMoveAction extends Action {
 
     regenerateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
         console.log("REGENERATE CHECKERS MOVE NEXT_SEL");
+        // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
         this.nextSelection = contextSpace
             .getReachable(this.unit.loc, 1, this.nh)
-            .map(dest => new Path(this.unit.loc, dest, contextSpace, 1));
-    }
-}
-
-class MoveAction extends Action {
-    constructor(index, contextUnit) {
-        const digestFn = function (stack) {
-            let u = stack[1];
-            let paths = stack.slice(2).filter(p => (p.constructor.name == "Path"));
-            return paths.map(p => new MoveEffect(u, p.destination)).concat([new EndTurnEffect()]);
-        }
-        super("MOVE", "M", () => { }, digestFn, index); //nextSelFn, digestFn
-        this.unit = contextUnit;
-    }
-
-    regenerateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
-        console.log("REGENERATE MOVE NEXT_SEL");
-        this.nextSelection = contextSpace.getReachable(this.unit.loc, this.unit.range).map(dest => new Path(this.unit.loc, dest, contextSpace, this.unit.range));
+            .map(dest => new Path(this.unit.loc, dest, contextSpace, 1, this.nh));
     }
 }
 
@@ -249,10 +253,10 @@ class ReadyCounterAction extends Action {
 }
 
 class Path {
-    constructor(origin, destination, contextSpace, total_range) { // (origin: Location, destination: Location) : Path
+    constructor(origin, destination, contextSpace, total_range, nh) { // (origin: Location, destination: Location) : Path
         this.origin = origin;
         this.destination = destination;
-        this.locations = contextSpace.getPath(origin, destination);
+        this.locations = contextSpace.getPath(origin, destination, nh);
         this.clearNextSelection();
         this.remaining_range = total_range - this.locations.length;
     }

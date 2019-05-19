@@ -75,11 +75,11 @@ class Space {
         return Math.abs(origin.x - destination.x) + Math.abs(origin.y - destination.y);
     }
 
-    getPath(origin, destination) { // TODO: Make efficient and safe.
+    getPath(origin, destination, nh) { // TODO: Make efficient and safe.
         if (!origin.traversable || !destination.traversable) { return -1; }
         let dist = this.getDistance(origin, destination);
         if (dist == 0) { return []; }
-        let adjList = this.getAdjacent(origin);
+        let adjList = this.getAdjacent(origin, nh);
         let adjDistances = adjList.map(adj => this.getDistance(adj, destination));
         let nearestAdjIndex = argmin(adjDistances);
         let nearestAdj = adjList[nearestAdjIndex];
