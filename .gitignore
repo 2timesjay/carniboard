@@ -5,5 +5,4 @@ favicon/*
 bundlethree.js
 bundle.js
 .vscode/launch.json
-design/checkers_jump.txt
-design/todo.txt
+design/*

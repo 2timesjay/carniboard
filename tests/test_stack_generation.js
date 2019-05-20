@@ -40,6 +40,7 @@ test('simulatedBasicTacticsSelectionIntegration', function (t) {
     )
 
     stack.push(topSel[4])
+    console.log(stack[stack.length-1]);
     topSel = stack[stack.length - 1].getNextSelection(space);
     t.deepEquals(
         topSel[0].constructor.name,
