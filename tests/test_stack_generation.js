@@ -60,7 +60,7 @@ test('generateAllSelectionsBasicTactics', function (t) {
     t.plan(1);
     let state = makeBasicTactics();
     let options = generateAllSelections(state);
-    t.equals(options.length, 108);
+    t.equals(options.length, 67);
 });
 
 test('generateAllSelectionsTicTacToe', function (t) {

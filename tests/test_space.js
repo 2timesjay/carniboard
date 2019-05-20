@@ -19,7 +19,7 @@ units = [
     { 'range': 3, 'loc': [0, 0], 'name': 'anxia', 'team': 0 },
     { 'range': 3, 'loc': [3, 1], 'name': 'boxer', 'team': 1 },
     { 'range': 3, 'loc': [3, 2], 'name': 'caleb', 'team': 0 },
-    { 'range': 4, 'loc': [5, 5], 'name': 'deep', 'team': 1 }
+    { 'range': 4, 'loc': [5, 3], 'name': 'deep', 'team': 1 }
 ].map(u => new Unit(u.name, locations[u.loc[1]][u.loc[0]], u.team, u));
 
 space = new Space(locations, units);
