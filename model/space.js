@@ -19,7 +19,7 @@ class Space {
     }
 
     getAdjacent(loc, nh) { // (loc: Location): Location[]
-        let neighborhood = nh == null ? [[1, 0], [0, 1],  [-1, 0], [0, -1]] : nh;
+        let neighborhood = nh || [[1, 0], [0, 1],  [-1, 0], [0, -1]];
         function isValidLoc(adj) { return adj != undefined && adj.traversable; }
         const x = loc.x;
         const y = loc.y;
@@ -52,7 +52,9 @@ class Space {
         let frontier = new Set([...reached]);
         let self = this;
         for (let i = 1; i <= range; i++) {
-            next = Array.from(frontier).flatMap(l => self.getAdjacent(l, nh)).filter(l => !self.isOccupied(l));
+            next = Array.from(frontier)
+                .flatMap(l => self.getAdjacent(l, nh))
+                .filter(l => !self.isOccupied(l));
             frontier = difference(next, frontier);
             reached = union(reached, next);
         }

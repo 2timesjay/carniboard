@@ -1,0 +1,7 @@
+{
+  "name": "carniboard",
+  "version": "0.1.0",
+  "dependencies": {
+    "tape": "^4.10.1"
+  }
+}

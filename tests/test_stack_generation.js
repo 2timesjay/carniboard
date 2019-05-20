@@ -27,28 +27,32 @@ test('simulatedBasicTacticsSelectionIntegration', function (t) {
     topSel = stack[stack.length - 1].getNextSelection(space);
     t.deepEquals(
         topSel.map(a => a.actionType),
-        ['MOVE', 'ATTACK', 'COUNTER']
+        ['MOVE', 'ATTACK', 'COUNTER'],
+        "Unit selection gives action enum options"
     )
 
     stack.push(topSel[0])
     topSel = stack[stack.length - 1].getNextSelection(space);
     t.deepEquals(
         topSel.length,
-        5
+        5,
+        "Selecting move gives Path options"
     )
 
     stack.push(topSel[4])
     topSel = stack[stack.length - 1].getNextSelection(space);
     t.deepEquals(
         topSel[0].constructor.name,
-        "Confirmation"
+        "Confirmation",
+        "Last option is confirmation"
     )
 
     let digestFn = digestFnGetter(stack);
     let effects = digestFn(stack)
     t.deepEquals(
         effects.length,
-        2
+        2,
+        "Generate 2 effects"
     )
 });
 
