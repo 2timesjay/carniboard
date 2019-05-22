@@ -39,7 +39,12 @@ class Space {
         return adjList;
     }
 
-    getRelativeLoc(origin, destination){
+    getByRelativeCo(origin, relativeCo) { // (loc: Location): Location[]
+        let destination = this.getAdjacent(origin, [relativeCo]);
+        return destination[0] || null;
+    }
+
+    getRelativeCo(origin, destination){
         return [destination.x - origin.x, destination.y - origin.y];
     }
 

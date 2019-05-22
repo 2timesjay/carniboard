@@ -184,7 +184,7 @@ class MoveAction extends Action {
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
         this.nextSelection = sp
             .getReachable(this.unit.loc, this.unit.range)
-            .map(dest => new Path(this.unit.loc, dest, sp, this.unit.range));
+            .map(destination => new Path(this.unit.loc, destination, sp, this.unit.range));
     }
 }
 
@@ -194,7 +194,7 @@ class CheckersMoveAction extends Action {
     constructor(index, contextUnit) {
         const digestFn = function (stack) {
             let u = stack[1];
-            let paths = stack.slice(2).filter(p => (p.constructor.name == "Path"));
+            let paths = stack.slice(2).filter(p => (p.constructor.name == "CheckersPath"));
             return paths.map(p => new MoveEffect(u, p.destination)).concat([new EndTurnEffect()]);
         }
         super("CMOVE", "CM", () => {}, digestFn, index); //nextSelFn, digestFn
@@ -205,9 +205,10 @@ class CheckersMoveAction extends Action {
     _calculateNextSelection(sp) { // (sp: Space): Path[] 
         console.log("RECALCULATE CHECKERS MOVE NEXT_SEL");
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
+        // TODO: initialize selection from CheckersPath object instead of copying its logic here.
         this.nextSelection = sp
             .getReachable(this.unit.loc, 1, this.nh)
-            .map(dest => new Path(this.unit.loc, dest, sp, 1, this.nh));
+            .map(destination => new CheckersPath(this.unit.loc, destination, sp, 1, this.nh));
     }
 }
 
@@ -250,6 +251,7 @@ class Path extends AbstractEntity {
         this.origin = origin;
         this.destination = destination;
         this.locations = sp.getPath(origin, destination, nh);
+        this.nh = nh
         this.clearNextSelection();
         this.remaining_range = total_range - this.locations.length;
     }
@@ -260,8 +262,8 @@ class Path extends AbstractEntity {
         } else {
             this.nextSelection = sp
                 .getReachable(this.destination, this.remaining_range)
-                .map(next_dest => new Path(
-                    this.destination, next_dest, sp, this.remaining_range));
+                .map(next_destination => new Path(
+                    this.destination, next_destination, sp, this.remaining_range));
         }
     }
 
@@ -270,6 +272,10 @@ class Path extends AbstractEntity {
     }
 }
 
+// Checker-related enums
+let JUMP = 0
+let LAND = 1
+
 class CheckersPath extends Path {
     constructor(origin, destination, sp, total_range, nh, jump, king) { // (origin: Location, destination: Location) : Path
         super(origin, destination, sp, total_range, nh);
@@ -277,22 +283,56 @@ class CheckersPath extends Path {
         this.king = king;
     }
 
-    _getJumpPaths(){
-        sp.getAdjacent(this.origin, this.nh).filter(n => sp.isOccupied(n));
+    _getJumpPaths(sp){
+        // returns a length-2 list of locs visited on a jump [(jumpedLoc, JUMP), (landLoc, LAND)]
+        console.log("calculating jumps");
+        let jumps = sp.getAdjacent(this.origin, this.nh)
+            .filter(jumped => sp.isOccupied(jumped));
+        // TODO: filter to occupied by opposite team.
+        console.log(jumps);
+        if (jumps.length > 0) {
+            let jump_paths = jumps
+                .map(jumped => {
+                    // An open space in the same direction as the jumped piece.
+                    let relCo = sp.getRelativeCo(this.origin, jumped);
+                    let destination = sp.getByRelativeCo(jumped, relCo);
+                    return [jumped, destination];
+                });
+            console.log(jump_paths);
+            jump_paths = jump_paths    
+                .filter(pair => {
+                    let destination = pair[1]; // TODO: use nice destructuring approach?
+                    return destination != null && !sp.isOccupied(destination);
+                });
+            console.log(jump_paths);
+            return jump_paths;
+        } else {
+            return []
+        }
     }
     
-    _getMovePaths(){
-        sp.getAdjacent(this.origin, this.nh).filter(n => !sp.isOccupied(n));
+    _getMovePaths(sp){
+        return sp.getAdjacent(this.origin, this.nh)
+            .filter(destination => !sp.isOccupied(destination))
+            .map(destination => [destination]);
     }
+
     _calculateNextSelection(sp) { // (sp: Space): Location[] 
-        if (this.remaining_range == 0 || this.origin == this.destination) {
+        // TODO: clean up, reinstate origin/destination check.
+        if (this.remaining_range == 0){// || this.origin == this.destination) {
             this.nextSelection = [new Confirmation(this)];
         } else {
-            this.nextSelection = sp
-                .getReachable(this.destination, this.remaining_range)
-                .map(next_dest => new CheckerPath(
-                    this.destination, next_dest, sp, this.remaining_range, this.nh, this.jump, this.king));
+            // this.nextSelection = sp
+            //     .getReachable(this.destination, this.remaining_range)
+            //     .map(next_destination => new CheckerPath(
+            //         this.destination, next_destination, sp, this.remaining_range, this.nh, this.jump, this.king));
+            this.nextSelection = this._getMovePaths(sp).concat(this._getJumpPaths(sp))
+                .map(path => path[path.length - 1])
+                .map(next_destination => new CheckersPath(
+                    this.destination, next_destination, sp, this.remaining_range, this.nh, this.jump, this.king));
         }
+        console.log("Checkers Paths");
+        console.log(this.nextSelection);
     }
 
     clearNextSelection() {

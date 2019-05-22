@@ -260,7 +260,7 @@ makeCheckers = function () {
             'team': 0
         },
         {
-            'loc': [2, 0],
+            'loc': [1, 1],
             'name': 'red2',
             'team': 0
         },
@@ -270,7 +270,7 @@ makeCheckers = function () {
             'team': 1
         },
         {
-            'loc': [3, 3],
+            'loc': [2, 2],
             'name': 'black2',
             'team': 1
         }

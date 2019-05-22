@@ -375,6 +375,7 @@ module.exports = {
     Unit: UnitDisplay,
     Location: LocationDisplay,
     Path: PathDisplay,
+    CheckersPath: PathDisplay,
     CheckersMoveAction: ActionDisplay,
     MoveAction: ActionDisplay,
     AttackAction: ActionDisplay,
