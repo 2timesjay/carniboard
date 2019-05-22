@@ -25,14 +25,14 @@ class AbstractEntity {
         this.clearNextSelection();
     }
 
-    getNextSelection(contextSpace) { // TODO: Make nextSelection explicitly caching, not dangerous state
+    getNextSelection(sp) { // TODO: Make nextSelection explicitly caching, not dangerous state
         if (this.nextSelection == undefined) {
-            this._calculateNextSelection(contextSpace)
+            this._calculateNextSelection(sp)
         };
         return this.nextSelection;
     }
 
-    _calculateNextSelection(contextSpace) {
+    _calculateNextSelection(sp) {
         this.nextSelection = [];
     }
 
@@ -58,7 +58,7 @@ class Location extends AbstractEntity {
         this.traversable = traversable;
     }
 
-    _calculateNextSelection(contextSpace) {
+    _calculateNextSelection(sp) {
         this.nextSelection = [new Confirmation(this)];
     }
 
@@ -78,7 +78,7 @@ class Confirmation { // TODO: Make entity?
         this.isEnd = isEnd || false;
     }
 
-    getNextSelection(contextSpace) {
+    getNextSelection(sp) {
         return [];
     }
 }
@@ -101,7 +101,7 @@ class BaseUnit extends AbstractEntity { // isa Entity
         return this.hp > 0;
     }
 
-    _calculateNextSelection(contextSpace) {
+    _calculateNextSelection(sp) {
         if (this.isAlive()) {
             this.nextSelection = this.actionClasses.map((a, i) => new a(i, this));
         } else {
@@ -156,7 +156,7 @@ class Action extends AbstractEntity {
         }
     }
 
-    _calculateNextSelection(contextSpace) {
+    _calculateNextSelection(sp) {
         return this.nextSelFn;
     }
 
@@ -176,12 +176,12 @@ class MoveAction extends Action {
         this.unit = contextUnit;
     }
 
-    _calculateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
+    _calculateNextSelection(sp) { // (sp: Space): Path[] 
         console.log("RECALCULATE MOVE NEXT_SEL");
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
-        this.nextSelection = contextSpace
+        this.nextSelection = sp
             .getReachable(this.unit.loc, this.unit.range)
-            .map(dest => new Path(this.unit.loc, dest, contextSpace, this.unit.range));
+            .map(dest => new Path(this.unit.loc, dest, sp, this.unit.range));
     }
 }
 
@@ -199,12 +199,12 @@ class CheckersMoveAction extends Action {
         this.nh = this.unit.team == 0 ? [[1, -1], [1, 1]] : [[-1, -1], [-1, 1]];
     }
 
-    _calculateNextSelection(contextSpace) { // (contextSpace: Space): Path[] 
+    _calculateNextSelection(sp) { // (sp: Space): Path[] 
         console.log("RECALCULATE CHECKERS MOVE NEXT_SEL");
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
-        this.nextSelection = contextSpace
+        this.nextSelection = sp
             .getReachable(this.unit.loc, 1, this.nh)
-            .map(dest => new Path(this.unit.loc, dest, contextSpace, 1, this.nh));
+            .map(dest => new Path(this.unit.loc, dest, sp, 1, this.nh));
     }
 }
 
@@ -219,10 +219,10 @@ class AttackAction extends Action {
         this.unit = contextUnit;
     }
 
-    _calculateNextSelection(contextSpace) { // (contextSpace: Space): Location[] 
+    _calculateNextSelection(sp) { // (sp: Space): Location[] 
         console.log("RECALCULATE ATTACK NEXT_SEL");
-        this.nextSelection = contextSpace.units
-            .filter(u => contextSpace.getDistanceDirect(u.loc, this.unit.loc) < this.unit.arange)
+        this.nextSelection = sp.units
+            .filter(u => sp.getDistanceDirect(u.loc, this.unit.loc) < this.unit.arange)
             .map(u => u.loc);
     }
 }
@@ -236,29 +236,29 @@ class ReadyCounterAction extends Action {
         this.unit = contextUnit;
     }
 
-    _calculateNextSelection(contextSpace) { // (contextSpace: Space): Confirmation[]
+    _calculateNextSelection(sp) { // (sp: Space): Confirmation[]
         this.nextSelection = [new Confirmation(this)];
     }
 }
 
 class Path extends AbstractEntity {
-    constructor(origin, destination, contextSpace, total_range, nh) { // (origin: Location, destination: Location) : Path
+    constructor(origin, destination, sp, total_range, nh) { // (origin: Location, destination: Location) : Path
         super();
         this.origin = origin;
         this.destination = destination;
-        this.locations = contextSpace.getPath(origin, destination, nh);
+        this.locations = sp.getPath(origin, destination, nh);
         this.clearNextSelection();
         this.remaining_range = total_range - this.locations.length;
     }
 
-    _calculateNextSelection(contextSpace) { // (contextSpace: Space): Location[] 
+    _calculateNextSelection(sp) { // (sp: Space): Location[] 
         if (this.remaining_range == 0 || this.origin == this.destination) {
             this.nextSelection = [new Confirmation(this)];
         } else {
-            this.nextSelection = contextSpace
+            this.nextSelection = sp
                 .getReachable(this.destination, this.remaining_range)
                 .map(next_dest => new Path(
-                    this.destination, next_dest, contextSpace, this.remaining_range));
+                    this.destination, next_dest, sp, this.remaining_range));
         }
     }
 
@@ -268,26 +268,27 @@ class Path extends AbstractEntity {
 }
 
 class CheckersPath extends Path {
-    constructor(origin, destination, contextSpace, total_range, nh, jump, king) { // (origin: Location, destination: Location) : Path
-        super(origin, destination, contextSpace, total_range, nh);
+    constructor(origin, destination, sp, total_range, nh, jump, king) { // (origin: Location, destination: Location) : Path
+        super(origin, destination, sp, total_range, nh);
         this.jump = jump;
         this.king = king;
     }
 
     _getJumpPaths(){
+        sp.getAdjacent(this.origin, this.nh).filter(n => sp.isOccupied(n));
     }
     
     _getMovePaths(){
-        return this.nh.map
+        sp.getAdjacent(this.origin, this.nh).filter(n => !sp.isOccupied(n));
     }
-    _calculateNextSelection(contextSpace) { // (contextSpace: Space): Location[] 
+    _calculateNextSelection(sp) { // (sp: Space): Location[] 
         if (this.remaining_range == 0 || this.origin == this.destination) {
             this.nextSelection = [new Confirmation(this)];
         } else {
-            this.nextSelection = contextSpace
+            this.nextSelection = sp
                 .getReachable(this.destination, this.remaining_range)
                 .map(next_dest => new CheckerPath(
-                    this.destination, next_dest, contextSpace, this.remaining_range, this.nh, this.jump, this.king));
+                    this.destination, next_dest, sp, this.remaining_range, this.nh, this.jump, this.king));
         }
     }
 
@@ -301,19 +302,19 @@ class BaseControlQueue extends AbstractEntity {
         super()
     }
 
-    checkEnd(contextSpace) {
-        state = contextSpace.state
-        let end = state.gameEndFn(contextSpace);
+    checkEnd(sp) {
+        state = sp.state
+        let end = state.gameEndFn(sp);
         if (end.length > 0) { console.log("GAME OVER"); return end; }
         else { return undefined; }
     }
 
-    incrementQueue(contextSpace) {
+    incrementQueue(sp) {
         return [];
     }
 
-    getNextSelection(contextSpace) {
-        return this.checkEnd(contextSpace) || this.incrementQueue(contextSpace);
+    getNextSelection(sp) {
+        return this.checkEnd(sp) || this.incrementQueue(sp);
     }
 
     clone() {
@@ -326,8 +327,8 @@ class TicTacToeControlQueue extends BaseControlQueue {
         super()
     }
 
-    incrementQueue(contextSpace) {
-        return Array.from(difference(new Set(contextSpace.locations.flatMap(l => l)), new Set(contextSpace.units.map(u => u.loc))));
+    incrementQueue(sp) {
+        return Array.from(difference(new Set(sp.locations.flatMap(l => l)), new Set(sp.units.map(u => u.loc))));
     }
 }
 
@@ -336,8 +337,8 @@ class ConnectFourControlQueue extends BaseControlQueue {
         super()
     }
 
-    incrementQueue(contextSpace) {
-        return Array.from(difference(new Set(contextSpace.locations.flatMap(l => l)), new Set(contextSpace.units.map(u => u.loc))));
+    incrementQueue(sp) {
+        return Array.from(difference(new Set(sp.locations.flatMap(l => l)), new Set(sp.units.map(u => u.loc))));
     }
 }
 
@@ -346,8 +347,8 @@ class CheckersControlQueue extends BaseControlQueue {
         super()
     }
 
-    incrementQueue(contextSpace) {
-        return contextSpace.units.filter(u => u.team == contextSpace.state.team);
+    incrementQueue(sp) {
+        return sp.units.filter(u => u.team == sp.state.team);
     }
 }
 
@@ -357,8 +358,8 @@ class BasicTacticsControlQueue extends BaseControlQueue {
         super()
     }
 
-    incrementQueue(contextSpace) {
-        return contextSpace.units.filter(u => u.team == contextSpace.state.team);
+    incrementQueue(sp) {
+        return sp.units.filter(u => u.team == sp.state.team);
     }
 }
 

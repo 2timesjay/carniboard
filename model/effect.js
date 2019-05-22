@@ -23,8 +23,8 @@ class AddUnitEffect extends Effect {
         this.destination = destination;
     }
 
-    execute(contextSpace) {
-        contextSpace.units.push(new Unit("", contextSpace.getLocation(this.destination), contextSpace.state.team));
+    execute(sp) {
+        sp.units.push(new Unit("", sp.getLocation(this.destination), sp.state.team));
         return this;
     }
 }
@@ -34,8 +34,8 @@ class EndTurnEffect extends Effect {
         super();
     }
 
-    execute(contextSpace) {
-        contextSpace.state.advance();
+    execute(sp) {
+        sp.state.advance();
         return this;
     }
 }
@@ -47,9 +47,9 @@ class MoveEffect extends Effect {
         this.destination = destination;
     }
 
-    execute(contextSpace) {
-        this.unit = contextSpace.units.filter(u => u.name == this.unit.name)[0]; // Questionable way to update unit on refresh.
-        this.unit.loc = contextSpace.getLocation(this.destination);
+    execute(sp) {
+        this.unit = sp.units.filter(u => u.name == this.unit.name)[0]; // Questionable way to update unit on refresh.
+        this.unit.loc = sp.getLocation(this.destination);
         return this;
     }
 
@@ -65,16 +65,16 @@ class DamageEffect extends Effect {
         this.target = target;
     }
 
-    preExecute(contextSpace) { // (contextSpace: Space) : Effect
-        let effects = contextSpace.state.triggerObservers(this);
+    preExecute(sp) { // (sp: Space) : Effect
+        let effects = sp.state.triggerObservers(this);
         console.log("triggered effects: ", effects);
-        return effects.map(e => e.execute(contextSpace));
+        return effects.map(e => e.execute(sp));
     }
 
-    execute(contextSpace) {
-        this.unit = contextSpace.units.filter(u => u.name == this.unit.name)[0];
-        this.preExecute(contextSpace);
-        const unitsAtTarget = contextSpace.getUnit(this.target);
+    execute(sp) {
+        this.unit = sp.units.filter(u => u.name == this.unit.name)[0];
+        this.preExecute(sp);
+        const unitsAtTarget = sp.getUnit(this.target);
         if (unitsAtTarget.length == 1) {
             const targetUnit = unitsAtTarget[0];
             targetUnit.hp = targetUnit.hp - this.unit.dmg;
@@ -93,8 +93,8 @@ class SetObserverEffect extends Effect {
         this.unit = stack[1];
     }
 
-    execute(contextSpace) {
-        contextSpace.state.observers.push(new CounterObserver(this.unit));
+    execute(sp) {
+        sp.state.observers.push(new CounterObserver(this.unit));
         return this;
     }
 }

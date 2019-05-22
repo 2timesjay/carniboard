@@ -36,6 +36,10 @@ class Space {
         return adjList;
     }
 
+    getRelativeLoc(origin, destination){
+        return [destination.x - origin.x, destination.y - origin.y];
+    }
+
     isOccupied(loc) {
         return this.units.filter(u => u.loc == loc).length > 0;
     }
