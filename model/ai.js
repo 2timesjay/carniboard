@@ -1,7 +1,3 @@
-Array.prototype.flatMap = function (lambda) {
-    return Array.prototype.concat.apply([], this.map(lambda));
-}
-
 score = function(state) {  // (state: State): number 
     return state.score;
 }

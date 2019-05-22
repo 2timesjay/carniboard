@@ -1,9 +1,5 @@
 /* Imports */
 
-Array.prototype.flatMap = function (lambda) {
-    return Array.prototype.concat.apply([], this.map(lambda));
-}
-
 console.log("Starting");
 
 makeTicTacToe = require('../model/construction').makeTicTacToe;

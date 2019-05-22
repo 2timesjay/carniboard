@@ -1,7 +1,3 @@
-Array.prototype.flatMap = function (lambda) {
-    return Array.prototype.concat.apply([], this.map(lambda));
-}
-
 effects = require("../model/effect")
 AddUnitEffect = effects.AddUnitEffect
 EndTurnEffect = effects.EndTurnEffect
@@ -259,7 +255,39 @@ class Path extends AbstractEntity {
         if (this.remaining_range == 0 || this.origin == this.destination) {
             this.nextSelection = [new Confirmation(this)];
         } else {
-            this.nextSelection = contextSpace.getReachable(this.destination, this.remaining_range).map(next_dest => new Path(this.destination, next_dest, contextSpace, this.remaining_range));
+            this.nextSelection = contextSpace
+                .getReachable(this.destination, this.remaining_range)
+                .map(next_dest => new Path(
+                    this.destination, next_dest, contextSpace, this.remaining_range));
+        }
+    }
+
+    clearNextSelection() {
+        this.nextSelection = undefined;
+    }
+}
+
+class CheckersPath extends Path {
+    constructor(origin, destination, contextSpace, total_range, nh, jump, king) { // (origin: Location, destination: Location) : Path
+        super(origin, destination, contextSpace, total_range, nh);
+        this.jump = jump;
+        this.king = king;
+    }
+
+    _getJumpPaths(){
+    }
+    
+    _getMovePaths(){
+        return this.nh.map
+    }
+    _calculateNextSelection(contextSpace) { // (contextSpace: Space): Location[] 
+        if (this.remaining_range == 0 || this.origin == this.destination) {
+            this.nextSelection = [new Confirmation(this)];
+        } else {
+            this.nextSelection = contextSpace
+                .getReachable(this.destination, this.remaining_range)
+                .map(next_dest => new CheckerPath(
+                    this.destination, next_dest, contextSpace, this.remaining_range, this.nh, this.jump, this.king));
         }
     }
 
