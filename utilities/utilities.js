@@ -1,3 +1,7 @@
+function flatMap(lambda) {
+    return Array.prototype.concat.apply([], this.map(lambda));
+};
+
 function argmin(arr) {
     let min = Math.min(...arr);
     return arr.indexOf(min);
@@ -19,5 +23,6 @@ function getRandomColor() {
 }
 
 module.exports = {
-    intersection: intersection
+    intersection: intersection,
+    flatMap: flatMap
 }

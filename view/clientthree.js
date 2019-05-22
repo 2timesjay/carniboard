@@ -1,4 +1,6 @@
 /* Imports */
+utils = require('../utilities/utilities.js');
+Array.prototype.flatMap = utils.flatMap;
 
 console.log("Starting");
 

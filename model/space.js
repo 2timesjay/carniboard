@@ -1,3 +1,6 @@
+utils = require('../utilities/utilities.js');
+Array.prototype.flatMap = utils.flatMap;
+
 function argmin(arr) {
     let min = Math.min(...arr);
     return arr.indexOf(min);

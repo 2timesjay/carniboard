@@ -1,3 +1,6 @@
+utils = require('../utilities/utilities.js');
+Array.prototype.flatMap = utils.flatMap;
+
 score = function(state) {  // (state: State): number 
     return state.score;
 }
