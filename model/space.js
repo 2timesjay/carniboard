@@ -86,6 +86,7 @@ class Space {
     }
 
     getPath(origin, destination, nh) { // TODO: Make efficient and safe.
+        // console.log(origin, destination, nh);
         if (!origin.traversable || !destination.traversable) { return -1; }
         let dist = this.getDistance(origin, destination);
         if (dist == 0) { return []; }
