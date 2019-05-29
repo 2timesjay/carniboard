@@ -206,6 +206,7 @@ class CheckersMoveAction extends Action {
         console.log("CALCULATE INITIAL CHECKERS PATH SEL");
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
         // TODO: initialize selection from CheckersPath object instead of copying its logic here.
+        // TODO: this.constructor doesn't work here.
         let checkersPath = new CheckersPath(this.unit.loc, this.unit.loc, sp, 1, this.nh);
         checkersPath.calculateInitialSelection(sp);
         this.nextSelection = checkersPath.nextSelection;
@@ -434,4 +435,9 @@ module.exports = {
     ConnectFourControlQueue: ConnectFourControlQueue,
     BasicTacticsControlQueue: BasicTacticsControlQueue,
     Confirmation: Confirmation,
+    // Actions
+    MoveAction: MoveAction,
+    CheckersMoveAction: CheckersMoveAction,
+    AttackAction: AttackAction,
+    ReadyCounterAction: ReadyCounterAction
 }

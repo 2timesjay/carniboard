@@ -281,6 +281,7 @@ makeCheckers = function () {
         let aliveUnits = team.filter(u => u.isAlive());
         return aliveUnits.length == 0;
     };
+
     gameEndConfirmation = function (spc) {
         let t0 = spc.units.filter(u => u.team == 0);
         let t1 = spc.units.filter(u => u.team == 1);
@@ -290,6 +291,7 @@ makeCheckers = function () {
             return [];
         };
     };
+
     digestFnGetter = function (stack) { // stack => (stack => Effect[])
         let action = stack[2];
         return action.digestFn;
@@ -306,7 +308,8 @@ makeCheckers = function () {
         } else {
             return 0;
         }
-    }
+    };
+    
     stack = [new BasicTacticsControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
     return state;
