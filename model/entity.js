@@ -1,14 +1,14 @@
 utils = require('../utilities/utilities.js');
 Array.prototype.flatMap = utils.flatMap;
 
-effects = require("../model/effect")
-AddUnitEffect = effects.AddUnitEffect
-EndTurnEffect = effects.EndTurnEffect
-MoveEffect = effects.MoveEffect
-DamageEffect = effects.DamageEffect
-SetObserverEffect = effects.SetObserverEffect
+effects = require("../model/effect");
+AddUnitEffect = effects.AddUnitEffect;
+EndTurnEffect = effects.EndTurnEffect;
+MoveEffect = effects.MoveEffect;
+DamageEffect = effects.DamageEffect;
+SetObserverEffect = effects.SetObserverEffect;
 
-difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)))
+difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)));
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
@@ -30,7 +30,7 @@ class AbstractEntity {
 
     getNextSelection(sp) { // TODO: Make nextSelection explicitly caching, not dangerous state
         if (this.nextSelection == undefined) {
-            this._calculateNextSelection(sp)
+            this._calculateNextSelection(sp);
         };
         return this.nextSelection;
     }
@@ -93,11 +93,11 @@ class BaseUnit extends AbstractEntity { // isa Entity
         this.arange = stats.arange || 3;
         this.maxhp = stats.maxhp || 3;
         this.hp = this.maxhp;
-        this.dmg = stats.dmg || 1
+        this.dmg = stats.dmg || 1;
         this.name = name;
         this.loc = loc;
         this.team = team;
-        this.actionClasses = actionClasses
+        this.actionClasses = actionClasses;
     }
 
     isAlive() {
@@ -174,7 +174,7 @@ class MoveAction extends Action {
             let u = stack[1];
             let paths = stack.slice(2).filter(p => (p.constructor.name == "Path"));
             return paths.map(p => new MoveEffect(u, p.destination)).concat([new EndTurnEffect()]);
-        }
+        };
         super("MOVE", "M", () => { }, digestFn, index); //nextSelFn, digestFn
         this.unit = contextUnit;
     }
@@ -196,7 +196,7 @@ class CheckersMoveAction extends Action {
             let u = stack[1];
             let paths = stack.slice(2).filter(p => (p.constructor.name == "CheckersPath"));
             return paths.map(p => new MoveEffect(u, p.destination)).concat([new EndTurnEffect()]);
-        }
+        };
         super("CMOVE", "CM", () => {}, digestFn, index); //nextSelFn, digestFn
         this.unit = contextUnit;
         this.nh = this.unit.team == 0 ? [[1, -1], [1, 1]] : [[-1, -1], [-1, 1]];
@@ -219,7 +219,7 @@ class AttackAction extends Action {
             let u = stack[1];
             let loc = stack[3];
             return [new DamageEffect(u, loc), new EndTurnEffect()];
-        }
+        };
         super("ATTACK", "A", () => { }, digestFn, index);
         this.unit = contextUnit;
     }
@@ -236,7 +236,7 @@ class ReadyCounterAction extends Action {
     constructor(index, contextUnit) {
         const digestFn = function (stack) {
             return [new SetObserverEffect(stack), new EndTurnEffect()];
-        }
+        };
         super("COUNTER", "C", () => { }, digestFn, index);
         this.unit = contextUnit;
     }
@@ -252,7 +252,7 @@ class Path extends AbstractEntity { // TODO: Simplify constructor - no destinati
         this.origin = origin;
         this.destination = destination;
         this.locations = sp.getPath(origin, destination, nh);
-        this.nh = nh
+        this.nh = nh;
         this.clearNextSelection();
         this.remaining_range = total_range - this.locations.length;
     }
@@ -284,10 +284,6 @@ class Path extends AbstractEntity { // TODO: Simplify constructor - no destinati
     }
 }
 
-// Checker-related enums
-let JUMP = 0
-let LAND = 1
-
 class CheckersPath extends Path {
     constructor(origin, destination, sp, total_range, nh, jump, king) { // (origin: Location, destination: Location) : Path
         super(origin, destination, sp, total_range, nh);
@@ -315,7 +311,7 @@ class CheckersPath extends Path {
                 });
             return jump_paths;
         } else {
-            return []
+            return [];
         }
     }
     
@@ -362,11 +358,11 @@ class CheckersPath extends Path {
 
 class BaseControlQueue extends AbstractEntity {
     constructor() {
-        super()
+        super();
     }
 
     checkEnd(sp) {
-        state = sp.state
+        state = sp.state;
         let end = state.gameEndFn(sp);
         if (end.length > 0) { console.log("GAME OVER"); return end; }
         else { return undefined; }
@@ -387,7 +383,7 @@ class BaseControlQueue extends AbstractEntity {
 
 class TicTacToeControlQueue extends BaseControlQueue {
     constructor() {
-        super()
+        super();
     }
 
     incrementQueue(sp) {
@@ -397,7 +393,7 @@ class TicTacToeControlQueue extends BaseControlQueue {
 
 class ConnectFourControlQueue extends BaseControlQueue {
     constructor() {
-        super()
+        super();
     }
 
     incrementQueue(sp) {
@@ -407,7 +403,7 @@ class ConnectFourControlQueue extends BaseControlQueue {
 
 class CheckersControlQueue extends BaseControlQueue {
     constructor() {
-        super()
+        super();
     }
 
     incrementQueue(sp) {
@@ -418,7 +414,7 @@ class CheckersControlQueue extends BaseControlQueue {
 
 class BasicTacticsControlQueue extends BaseControlQueue {
     constructor() {
-        super()
+        super();
     }
 
     incrementQueue(sp) {
@@ -440,4 +436,4 @@ module.exports = {
     CheckersMoveAction: CheckersMoveAction,
     AttackAction: AttackAction,
     ReadyCounterAction: ReadyCounterAction
-}
+};
