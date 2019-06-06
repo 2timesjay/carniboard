@@ -1,4 +1,4 @@
-display = require('../view/display');
+display = require('./display');
 
 var makeCanvas = function (width, height, attach) {
     var canvas = document.createElement("canvas");

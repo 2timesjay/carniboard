@@ -1,7 +1,7 @@
 immutable = require('immutable');
 ImmutableList = immutable.List;
 
-entity = require("../model/entity");
+entity = require("./entity");
 AbstractEntity = entity.AbstractEntity;
 Location = entity.Location;
 

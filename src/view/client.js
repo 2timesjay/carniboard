@@ -7,12 +7,12 @@ console.log("Starting");
 makeTicTacToe = require('../model/construction').makeTicTacToe;
 makeConnectFour = require('../model/construction').makeConnectFour;
 makeBasicTactics = require('../model/construction').makeBasicTactics;
-draw = require('../view/draw');
+draw = require('./draw');
 redraw = draw.redraw;
 addListeners = draw.addListeners;
 checkConfirmation = draw.checkConfirmation;
 
-timeline = require("../view/timeline");
+timeline = require("./timeline");
 makeTimeline = timeline.makeTimeline;
 createTimelineController = timeline.createTimelineController;
 

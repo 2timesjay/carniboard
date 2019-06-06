@@ -1,7 +1,7 @@
 utils = require('../utilities/utilities.js');
 Array.prototype.flatMap = utils.flatMap;
 
-effects = require("../model/effect");
+effects = require("./effect");
 AddUnitEffect = effects.AddUnitEffect;
 EndTurnEffect = effects.EndTurnEffect;
 MoveEffect = effects.MoveEffect;

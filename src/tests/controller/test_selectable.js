@@ -1,9 +1,9 @@
 var test = require('tape');
-var Selectable = require('../../controller/selectable.js').Selectable;
-var TreeSelectable = require('../../controller/selectable.js').TreeSelectable;
+var Selectable = require('../../src/controller/selectable.js.js').Selectable;
+var TreeSelectable = require('../../src/controller/selectable.js.js').TreeSelectable;
 
-var Unit = require('../../model/entity.js').Unit;
-var MoveAction = require('../../model/entity.js').MoveAction;
+var Unit = require('../../src/model/entity.js.js').Unit;
+var MoveAction = require('../../src/model/entity.js.js').MoveAction;
 
 test('testSelectableConstruction', function (t) {
     

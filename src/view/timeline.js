@@ -1,4 +1,4 @@
-draw = require('../view/draw');
+draw = require('./draw');
 
 function createTimelineController(timelineView, resetFn) {
     let lc = new ListController(timelineView); // INTERFACE

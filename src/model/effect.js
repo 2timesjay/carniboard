@@ -1,4 +1,4 @@
-observer = require("../model/observer");
+observer = require("./observer");
 CounterObserver = observer.CounterObserver;
 
 class Effect {

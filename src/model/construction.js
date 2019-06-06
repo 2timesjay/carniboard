@@ -1,7 +1,7 @@
 utilities = require("../utilities/utilities")
 intersection = utilities.intersection;
 
-entity = require('../model/entity')
+entity = require('./entity')
 Unit = entity.Unit
 CheckerPiece = entity.CheckerPiece
 Location = entity.Location
@@ -10,12 +10,12 @@ ConnectFourControlQueue = entity.ConnectFourControlQueue
 BasicTacticsControlQueue = entity.BasicTacticsControlQueue
 Confirmation = entity.Confirmation
 
-effect = require('../model/effect')
+effect = require('./effect')
 AddUnitEffect = effect.AddUnitEffect
 EndTurnEffect = effect.EndTurnEffect
 
-Space = require('../model/space').Space
-State = require('../model/state').State
+Space = require('./space').Space
+State = require('./state').State
 
 makeTicTacToe = function () {
     let locations = [

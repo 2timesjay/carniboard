@@ -1,6 +1,6 @@
 const size = 100;
 
-utilities = require("../view/utilities");
+utilities = require("./utilities");
 makeRect = utilities.makeRect;
 getMousePos = utilities.getMousePos;
 makeCircle = utilities.makeCircle;
