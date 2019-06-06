@@ -5,7 +5,7 @@ class SelectionStack {
 
     peek() /* : Selectable */ {
         let last_index /* : Number */= this._stack.length - 1;
-        return this._stack[last_index]
+        return this._stack[last_index];
     }
 
     getNext() /* : Selectable[] */ {
@@ -37,7 +37,7 @@ class SelectionStack {
             } else {
                 collection.push(item);
             }
-        })
+        });
         
     }
 
@@ -50,4 +50,4 @@ class SelectionStack {
 
 module.exports = {
     SelectionStack: SelectionStack
-}
+};
