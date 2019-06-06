@@ -68,6 +68,10 @@ class TreeSelectable extends Selectable {
         return pathsByGroup;
     }
 
+    _calculateNext() {
+        this.next = _getAllPaths().values;
+    }
+
     getNext(input) { 
         return new TreeSelectable(input, True, this.groupByFn, this.priorityFn);
     }

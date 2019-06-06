@@ -6,9 +6,9 @@ function argmin(arr) {
     return arr.indexOf(min);
 }
 
-difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)))
+difference = (set1, set2) => new Set([...set1].filter(num => !set2.has(num)));
 
-union = (set1, set2) => new Set([...set1, ...set2])
+union = (set1, set2) => new Set([...set1, ...set2]);
 
 class Space {
     constructor(locations, units, k) {
@@ -23,9 +23,9 @@ class Space {
         const x = loc.x;
         const y = loc.y;
         // TODO: Use neighborhood
-        let adjList = []
+        let adjList = [];
         for (let i = 0; i < neighborhood.length; i++) {
-            let delta = neighborhood[i]
+            let delta = neighborhood[i];
             let dy = delta[0];
             let dx = delta[1];
             let row = this.locations[y + dy];
@@ -114,4 +114,4 @@ class Space {
 
 module.exports = {
     Space: Space
-}
+};

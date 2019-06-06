@@ -27,9 +27,9 @@ class AbstractEntity {
     constructor() {
     }
 
-    getNext(input) { 
+    getNext(sp) { 
         if (this.next == undefined){
-            this._calculateNext();
+            this._calculateNext(sp);
         }
         return this.next;
     }
@@ -38,7 +38,7 @@ class AbstractEntity {
         this.next = undefined;
     }
 
-    _calculateNext() {
+    _calculateNext(sp) {
         this.next = [];
     }
 
@@ -182,7 +182,7 @@ class MoveAction extends Action {
         console.log("CALCULATE INITIAL PATH SEL");
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
         let path = new Path(this.unit.loc, this.unit.loc, sp, this.unit.range, this.nh);
-        path.calculateInitialSelection(sp);
+        path.calculateInitial(sp);
         this.next = path.next;
     }
 }
@@ -207,7 +207,7 @@ class CheckersMoveAction extends Action {
         // TODO: initialize selection from CheckersPath object instead of copying its logic here.
         // TODO: this.constructor doesn't work here.
         let checkersPath = new CheckersPath(this.unit.loc, this.unit.loc, sp, 1, this.nh);
-        checkersPath.calculateInitialSelection(sp);
+        checkersPath.calculateInitial(sp);
         this.next = checkersPath.next;
     }
 }
@@ -256,7 +256,7 @@ class Path extends AbstractEntity { // TODO: Simplify constructor - no destinati
         this.remaining_range = total_range - this.locations.length;
     }
 
-    calculateInitialSelection(sp) { // (sp: Space): Location[] 
+    calculateInitial(sp) { // (sp: Space): Location[] 
         if (this.remaining_range == 0) {
             this.next = [new Confirmation(this)];
         } else {
@@ -320,7 +320,7 @@ class CheckersPath extends Path {
             .map(destination => [destination]);
     }
     
-    calculateInitialSelection(sp) { // (sp: Space): CheckersPath[]
+    calculateInitial(sp) { // (sp: Space): CheckersPath[]
         // TODO: clean up, reinstate origin/destination check.
         if (this.remaining_range == 0) {
             this.next = [new Confirmation(this)];
@@ -422,6 +422,7 @@ class BasicTacticsControlQueue extends BaseControlQueue {
 }
 
 module.exports = {
+    AbstractEntity: AbstractEntity,
     Unit: Unit,
     CheckerPiece: CheckerPiece,
     Location: Location,
