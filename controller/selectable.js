@@ -1,28 +1,75 @@
+immutable = require('immutable');
+ImmutableList = immutable.List;
+
 class Selectable {
-    /* 
-     * Wrapper for entities turning them into selectables.
-     *
-     * Selectables generate subsequent selectables and contain additional metadata.
-     * 
-     * @param entity - entity being wrapped as a Selectable.
-     * @param label  - label used to identify this Selectable.
-     * @param
-     */
-    constructor(entity/* : AbstractEntity */, label) { 
+    constructor(entity, isConfirmable) {
         this.entity = entity;
-        this.label = label || null;
+        this.next = undefined;
+        this.isConfirmable = isConfirmable;
     }
 
-
-    getNext() /* : Selectable[] */ {
-        return this.entity.next.map(e => Selectable(e), e.constructor.name);
+    getNext(input) { 
+        if (this.next == undefined){
+            this._calculateNext();
+        }
+        return this.next;
     }
 
+    _calculateNext() {
+        this.next = [];
+    }
+}
 
-    clone() /* : Selectable */ { 
-    // TODO: Cloning relies on effect implementation matching distinct objects
-        let entityClone = this.entity.clone();
-        return new this.constructor(entityClone, this.label);
+class TreeSelectable extends Selectable {
+    /*
+     * Handles selection for tree-like entities.
+     *
+     * On initial select, shows top-priority path for each group.
+     * On subsequent selections, return TreeSelectable with end of those paths as root.
+     */
+    constructor(entity, isConfirmable, groupByFn, priorityFn) {
+        super(entity, isConfirmable);
+        this.groupByFn = groupByFn;
+        this.priorityFn = priorityFn;
+    }
+
+    _getAllPaths() {
+        const EXPLORATION_MARKER = 0; // TODO: Make some kind of marker entity?
+        var pathsByGroup = new Map();
+        var pathStack = [];
+        var searchStack = [this.entity];
+        while (searchStack.length > 0) {
+            let root = searchStack.pop();
+            if (root == EXPLORATION_MARKER) {
+                pathStack.pop();
+            }
+            else {
+                pathStack.push(root);
+                searchStack.push(EXPLORATION_MARKER);
+                if (root.childList.length > 0) {            
+                    searchStack.push(...root.childList);
+                }
+
+                // Update Map from groupBy key to paths if this new path has highest priority in group.
+                const path = new ImmutableList(pathStack);
+                const groupKey = this.groupByFn(path);
+                const oldPathAtGroupKey = pathsByGroup.get(groupKey);
+                if (oldPathAtGroupKey == undefined) { // Add path at key if no existing path.
+                    pathsByGroup[groupKey] = path;
+                } else { // Add path at key if of higher priority.
+                    let oldPathPriority = this.priorityFn(oldPathAtGroupKey);
+                    let newPathPriority = this.priorityFn(path);
+                    if (newPathPriority > oldPathPriority) {
+                        pathsByGroup[groupKey] = path;
+                    } 
+                }
+            }
+        }
+        return pathsByGroup;
+    }
+
+    getNext(input) { 
+        return new TreeSelectable(input, True, this.groupByFn, this.priorityFn);
     }
 }
 
