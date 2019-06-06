@@ -25,22 +25,21 @@ function hashIncr(hash, val){
 
 class AbstractEntity {
     constructor() {
-        this.clearNextSelection();
     }
 
-    getNextSelection(sp) { // TODO: Make nextSelection explicitly caching, not dangerous state
-        if (this.nextSelection == undefined) {
-            this._calculateNextSelection(sp);
-        };
-        return this.nextSelection;
+    getNext(input) { 
+        if (this.next == undefined){
+            this._calculateNext();
+        }
+        return this.next;
     }
 
-    _calculateNextSelection(sp) {
-        this.nextSelection = [];
+    clearNext() {
+        this.next = undefined;
     }
 
-    clearNextSelection() {
-        this.nextSelection = undefined;
+    _calculateNext() {
+        this.next = [];
     }
 
     hash(input) {
@@ -61,8 +60,8 @@ class Location extends AbstractEntity {
         this.traversable = traversable;
     }
 
-    _calculateNextSelection(sp) {
-        this.nextSelection = [new Confirmation(this)];
+    _calculateNext(sp) {
+        this.next = [new Confirmation(this)];
     }
 
     hash(){
@@ -81,7 +80,7 @@ class Confirmation { // TODO: Make entity?
         this.isEnd = isEnd || false;
     }
 
-    getNextSelection(sp) {
+    getNext(sp) {
         return [];
     }
 }
@@ -104,11 +103,11 @@ class BaseUnit extends AbstractEntity { // isa Entity
         return this.hp > 0;
     }
 
-    _calculateNextSelection(sp) {
+    _calculateNext(sp) {
         if (this.isAlive()) {
-            this.nextSelection = this.actionClasses.map((a, i) => new a(i, this));
+            this.next = this.actionClasses.map((a, i) => new a(i, this));
         } else {
-            this.nextSelection = [];
+            this.next = [];
         }
     }
 
@@ -159,12 +158,12 @@ class Action extends AbstractEntity {
         }
     }
 
-    _calculateNextSelection(sp) {
+    _calculateNext(sp) {
         return this.nextSelFn;
     }
 
-    clearNextSelection() {
-        this.nextSelection = undefined;
+    clearNext() {
+        this.next = undefined;
     }
 }
 
@@ -179,12 +178,12 @@ class MoveAction extends Action {
         this.unit = contextUnit;
     }
 
-    _calculateNextSelection(sp) { // (sp: Space): Path[] 
+    _calculateNext(sp) { // (sp: Space): Path[] 
         console.log("CALCULATE INITIAL PATH SEL");
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
         let path = new Path(this.unit.loc, this.unit.loc, sp, this.unit.range, this.nh);
         path.calculateInitialSelection(sp);
-        this.nextSelection = path.nextSelection;
+        this.next = path.next;
     }
 }
 
@@ -202,14 +201,14 @@ class CheckersMoveAction extends Action {
         this.nh = this.unit.team == 0 ? [[1, -1], [1, 1]] : [[-1, -1], [-1, 1]];
     }
 
-    _calculateNextSelection(sp) { // (sp: Space): Path[] 
+    _calculateNext(sp) { // (sp: Space): Path[] 
         console.log("CALCULATE INITIAL CHECKERS PATH SEL");
         // TODO: Paths from next_selection should reuse what's enumerated in MoveAction.
         // TODO: initialize selection from CheckersPath object instead of copying its logic here.
         // TODO: this.constructor doesn't work here.
         let checkersPath = new CheckersPath(this.unit.loc, this.unit.loc, sp, 1, this.nh);
         checkersPath.calculateInitialSelection(sp);
-        this.nextSelection = checkersPath.nextSelection;
+        this.next = checkersPath.next;
     }
 }
 
@@ -224,9 +223,9 @@ class AttackAction extends Action {
         this.unit = contextUnit;
     }
 
-    _calculateNextSelection(sp) { // (sp: Space): Location[] 
+    _calculateNext(sp) { // (sp: Space): Location[] 
         console.log("RECALCULATE ATTACK NEXT_SEL");
-        this.nextSelection = sp.units
+        this.next = sp.units
             .filter(u => sp.getDistanceDirect(u.loc, this.unit.loc) < this.unit.arange)
             .map(u => u.loc);
     }
@@ -241,8 +240,8 @@ class ReadyCounterAction extends Action {
         this.unit = contextUnit;
     }
 
-    _calculateNextSelection(sp) { // (sp: Space): Confirmation[]
-        this.nextSelection = [new Confirmation(this)];
+    _calculateNext(sp) { // (sp: Space): Confirmation[]
+        this.next = [new Confirmation(this)];
     }
 }
 
@@ -253,34 +252,34 @@ class Path extends AbstractEntity { // TODO: Simplify constructor - no destinati
         this.destination = destination;
         this.locations = sp.getPath(origin, destination, nh);
         this.nh = nh;
-        this.clearNextSelection();
+        this.clearNext();
         this.remaining_range = total_range - this.locations.length;
     }
 
     calculateInitialSelection(sp) { // (sp: Space): Location[] 
         if (this.remaining_range == 0) {
-            this.nextSelection = [new Confirmation(this)];
+            this.next = [new Confirmation(this)];
         } else {
-            this.nextSelection = sp
+            this.next = sp
                 .getReachable(this.destination, this.remaining_range)
                 .map(next_destination => new Path(
                     this.destination, next_destination, sp, this.remaining_range));
         }
     }
 
-    _calculateNextSelection(sp) { // (sp: Space): Location[] 
+    _calculateNext(sp) { // (sp: Space): Location[] 
         if (this.remaining_range == 0 || this.origin == this.destination) {
-            this.nextSelection = [new Confirmation(this)];
+            this.next = [new Confirmation(this)];
         } else {
-            this.nextSelection = sp
+            this.next = sp
                 .getReachable(this.destination, this.remaining_range)
                 .map(next_destination => new Path(
                     this.destination, next_destination, sp, this.remaining_range));
         }
     }
 
-    clearNextSelection() {
-        this.nextSelection = undefined;
+    clearNext() {
+        this.next = undefined;
     }
 }
 
@@ -324,35 +323,35 @@ class CheckersPath extends Path {
     calculateInitialSelection(sp) { // (sp: Space): CheckersPath[]
         // TODO: clean up, reinstate origin/destination check.
         if (this.remaining_range == 0) {
-            this.nextSelection = [new Confirmation(this)];
+            this.next = [new Confirmation(this)];
         } else {
-            this.nextSelection = this._getMovePaths(sp).concat(this._getJumpPaths(sp))
+            this.next = this._getMovePaths(sp).concat(this._getJumpPaths(sp))
                 .map(path => path[path.length - 1])
                 .map(next_destination => new CheckersPath(
                     this.destination || this.origin, next_destination, sp, this.remaining_range, this.nh, this.jump, this.king));
         }
         console.log("Initial Checkers Paths");
-        console.log(this.nextSelection);
-        return this.nextSelection;
+        console.log(this.next);
+        return this.next;
     }
 
-    _calculateNextSelection(sp) { // (sp: Space): CheckersPath[]
+    _calculateNext(sp) { // (sp: Space): CheckersPath[]
         // TODO: clean up, reinstate origin/destination check.
         if (this.remaining_range == 0 || this.origin == this.destination) {
-            this.nextSelection = [new Confirmation(this)];
+            this.next = [new Confirmation(this)];
         } else {
-            this.nextSelection = this._getMovePaths(sp).concat(this._getJumpPaths(sp))
+            this.next = this._getMovePaths(sp).concat(this._getJumpPaths(sp))
                 .map(path => path[path.length - 1])
                 .map(next_destination => new CheckersPath(
                     this.destination || this.origin, next_destination, sp, this.remaining_range, this.nh, this.jump, this.king));
         }
         console.log("Checkers Paths");
-        console.log(this.nextSelection);
-        return this.nextSelection;
+        console.log(this.next);
+        return this.next;
     }
 
-    clearNextSelection() {
-        this.nextSelection = undefined;
+    clearNext() {
+        this.next = undefined;
     }
 }
 
@@ -372,7 +371,7 @@ class BaseControlQueue extends AbstractEntity {
         return [];
     }
 
-    getNextSelection(sp) {
+    getNext(sp) {
         return this.checkEnd(sp) || this.incrementQueue(sp);
     }
 

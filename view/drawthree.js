@@ -34,9 +34,9 @@ var _getScene = function () {
     var light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(1, 1, 1).normalize();
     scene.add(light);
-    var light = new THREE.DirectionalLight(0xffffff, 0.4);
+    light = new THREE.DirectionalLight(0xffffff, 0.4);
     light.position.set(-1, -1, -1).normalize();
-    var light = new THREE.DirectionalLight(0xffffff, 0.7);
+    light = new THREE.DirectionalLight(0xffffff, 0.7);
     light.position.set(-4, -4, -12).normalize();
     scene.add(light);
     return scene;
@@ -227,7 +227,7 @@ var redraw = function (context, state, triggerList, size) {
             }
         }
         if (show_children) {
-            let selection = elem.getNextSelection(space);
+            let selection = elem.getNext(space);
             for (let i = 0; i < selection.length; i++) {
                 let s = selection[i];
                 tryAttachDisplay(s);
@@ -276,7 +276,7 @@ var checkConfirmation = function (state, timelineView) {
     let space = state.space
     let stack = state.stack;
     let digestFnGetter = state.digestFnGetter;
-    let topSel = stack[stack.length - 1].getNextSelection(space);
+    let topSel = stack[stack.length - 1].getNext(space);
     if (topSel.length > 0 && topSel[0].constructor.name == "Confirmation" && !topSel[0].isEnd) {
         console.log("CONFIRMED: ", stack);
         let digestFn = digestFnGetter(stack);

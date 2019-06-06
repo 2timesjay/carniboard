@@ -51,7 +51,7 @@ class AbstractDisplay {
             this.select = false;
             this.preview = false; // De-select whether automated or manual should end preview.
             stack.splice(stackIndex, stackIndex + 1);
-            this.entity.clearNextSelection();
+            this.entity.clearNext();
         }
     }
 
@@ -197,7 +197,7 @@ class UnitDisplay extends AbstractDisplay {
 
     render(context, clr, lfa) {
         const color = clr == undefined ? "black" : clr;
-        const alpha = lfa == undefined ? 0.5 ** (this.unit.maxhp - this.unit.hp) : lfa;
+        const alpha = lfa == undefined ? Math.pow(0.5, (this.unit.maxhp - this.unit.hp)) : lfa;
         makeRect(this.xOffset, this.yOffset, context, this.size, color, alpha);
     }
 

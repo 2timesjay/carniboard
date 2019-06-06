@@ -49,7 +49,7 @@ executeStacks = function(state, stacks) {
     // TODO: Cloning relies on effect implementation matching distinct objects
     let space = state.space;
     let digestFnGetter = state.digestFnGetter;
-    for (stack of stacks) {
+    for (var stack of stacks) {
         let digestFn = digestFnGetter(stack);
         let effects = digestFn(stack);
         effects.map(e => e.execute(space));
@@ -64,7 +64,7 @@ generateAllSelections = function (state) {
 }
 
 generateAllSelectionsHelper = function(stack, space) {
-    nextSelection = stack[stack.length - 1].getNextSelection(space);
+    nextSelection = stack[stack.length - 1].getNext(space);
     if (nextSelection.length == 1 && nextSelection[0].constructor.name == "Confirmation") {
         return [stack];
     }

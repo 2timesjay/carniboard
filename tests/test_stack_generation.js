@@ -13,18 +13,17 @@ test('simulatedBasicTacticsSelectionIntegration', function (t) {
     let space = state.space
     let stack = state.stack;
     let digestFnGetter = state.digestFnGetter;
-    let topSel = undefined;
 
     t.plan(5);
 
-    topSel = stack[stack.length - 1].getNextSelection(space);
+    let topSel = stack[stack.length - 1].getNext(space);
     t.deepEquals(
         topSel
-        [space.units.filter(u => u.team == 0)],
+        [space.units.filter(u => u.team == 0)]
     )
     
     stack.push(topSel[0])
-    topSel = stack[stack.length - 1].getNextSelection(space);
+    topSel = stack[stack.length - 1].getNext(space);
     t.deepEquals(
         topSel.map(a => a.actionType),
         ['MOVE', 'ATTACK', 'COUNTER'],
@@ -32,7 +31,7 @@ test('simulatedBasicTacticsSelectionIntegration', function (t) {
     )
 
     stack.push(topSel[0])
-    topSel = stack[stack.length - 1].getNextSelection(space);
+    topSel = stack[stack.length - 1].getNext(space);
     t.deepEquals(
         topSel.length,
         5,
@@ -41,7 +40,7 @@ test('simulatedBasicTacticsSelectionIntegration', function (t) {
 
     stack.push(topSel[4])
     console.log(stack[stack.length-1]);
-    topSel = stack[stack.length - 1].getNextSelection(space);
+    topSel = stack[stack.length - 1].getNext(space);
     t.deepEquals(
         topSel[0].constructor.name,
         "Confirmation",
