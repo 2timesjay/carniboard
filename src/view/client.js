@@ -16,7 +16,7 @@ timeline = require("./timeline");
 makeTimeline = timeline.makeTimeline;
 createTimelineController = timeline.createTimelineController;
 
-wiring = require("../utilities/wiring.js")
+wiring = require("../utilities/wiring.js");
 ListView = wiring.ListView;
 
 /* Checkers specific setup */
@@ -63,7 +63,7 @@ var loop = function() {
     addListeners(context, triggerList);
     checkConfirmation(state, tl); // TODO: Timeline
     tl_render_fn();
-}
+};
 loop();
 
 canvas.addEventListener(
