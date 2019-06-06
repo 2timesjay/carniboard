@@ -1,4 +1,4 @@
-display = require('../view/display')
+display = require('../view/display');
 
 var makeCanvas = function (width, height, attach) {
     var canvas = document.createElement("canvas");
@@ -8,13 +8,13 @@ var makeCanvas = function (width, height, attach) {
         document.body.appendChild(canvas);
     }
     return canvas;
-}
+};
 var addDisplay = function(entity){
     var className = entity.constructor.name;
     var displayConstructor = display[className];
     if (displayConstructor == undefined){ return undefined; }
     else { return new displayConstructor(entity); }
-}
+};
 
 var tryAttachDisplay = function(entity) {
     if (entity.display != undefined) { return; }
@@ -22,7 +22,7 @@ var tryAttachDisplay = function(entity) {
         var display = addDisplay(entity);
         entity.display = display;
     }
-}
+};
 
 var redraw = function(context, state, triggerList, size) {
     let space = state.space;
@@ -84,10 +84,10 @@ var redraw = function(context, state, triggerList, size) {
     }
     showSpace(space, stack);
     showInputStack(stack);
-}
+};
 
 var checkConfirmation = function (state, timelineView) {
-    let space = state.space
+    let space = state.space;
     let stack = state.stack;
     let digestFnGetter = state.digestFnGetter;
     let topSel = stack[stack.length - 1].getNext(space);
@@ -109,7 +109,7 @@ var checkConfirmation = function (state, timelineView) {
         return true;
     }
     return false;
-}
+};
 
 var execute = function(effects, space) {
     var effectToPromise = function(effect) {
@@ -121,25 +121,25 @@ var execute = function(effects, space) {
                     clearTimeout(executeAndAnimate);
                     resolve(result);
                     console.log("PROMISED: ", duration, effect);
-                }, duration)
-            })
+                }, duration);
+            });
             return effectPromise;
-        }
-    }
+        };
+    };
 
     var executionPromise = effects.reduce((prev, cur) => prev.then(effectToPromise(cur)), Promise.resolve());
     //executionPromise.then();
     return effects;
-}
+};
 
 var addListeners = function(context, triggerList) {
     context.canvas.onmousemove = function (event) {
-        triggerList.map(t => t(event))
-    }
+        triggerList.map(t => t(event));
+    };
     context.canvas.onclick = function (event) {
         triggerList.forEach(t => t(event));
-    }
-}
+    };
+};
 
 // viewof tac_board = {
 //     // TODO: Easier full reset than refresh?
@@ -167,4 +167,4 @@ module.exports = {
     addListeners: addListeners,
     checkConfirmation: checkConfirmation,
     makeCanvas: makeCanvas
-}
+};

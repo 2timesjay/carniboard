@@ -15,7 +15,7 @@ class Selectable {
 
 
     getNext() /* : Selectable[] */ {
-        return this.entity.next.map(e => Selectable(e), e.constructor.name)
+        return this.entity.next.map(e => Selectable(e), e.constructor.name);
     }
 
 
@@ -28,4 +28,4 @@ class Selectable {
 
 module.exports = {
     Selectable: Selectable
-}
+};

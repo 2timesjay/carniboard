@@ -10,7 +10,7 @@ const size = 100;
 
 test('simulatedBasicTacticsSelectionIntegration', function (t) {
     let state = makeBasicTactics();
-    let space = state.space
+    let space = state.space;
     let stack = state.stack;
     let digestFnGetter = state.digestFnGetter;
 
@@ -20,40 +20,40 @@ test('simulatedBasicTacticsSelectionIntegration', function (t) {
     t.deepEquals(
         topSel
         [space.units.filter(u => u.team == 0)]
-    )
+    );
     
-    stack.push(topSel[0])
+    stack.push(topSel[0]);
     topSel = stack[stack.length - 1].getNext(space);
     t.deepEquals(
         topSel.map(a => a.actionType),
         ['MOVE', 'ATTACK', 'COUNTER'],
         "Unit selection gives action enum options"
-    )
+    );
 
-    stack.push(topSel[0])
+    stack.push(topSel[0]);
     topSel = stack[stack.length - 1].getNext(space);
     t.deepEquals(
         topSel.length,
         5,
         "Selecting move gives Path options"
-    )
+    );
 
-    stack.push(topSel[4])
+    stack.push(topSel[4]);
     console.log(stack[stack.length-1]);
     topSel = stack[stack.length - 1].getNext(space);
     t.deepEquals(
         topSel[0].constructor.name,
         "Confirmation",
         "Last option is confirmation"
-    )
+    );
 
     let digestFn = digestFnGetter(stack);
-    let effects = digestFn(stack)
+    let effects = digestFn(stack);
     t.deepEquals(
         effects.length,
         2,
         "Generate 2 effects"
-    )
+    );
 });
 
 test('generateAllSelectionsBasicTactics', function (t) {

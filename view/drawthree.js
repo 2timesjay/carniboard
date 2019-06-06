@@ -1,7 +1,7 @@
 THREE = require('three');
 OrbitControls = require('three-orbit-controls')(THREE);
-display = require('../view/displaythree')
-utilities = require('../view/utilitiesthree')
+display = require('../view/displaythree');
+utilities = require('../view/utilitiesthree');
 
 var container;
 var camera, scene, raycaster, renderer;
@@ -23,8 +23,8 @@ var _getCoords = function () {
 
             [1, 0, 2]
         ]
-    )
-}
+    );
+};
 
 var _getScene = function () {
     const material = new THREE.MeshNormalMaterial();
@@ -40,7 +40,7 @@ var _getScene = function () {
     light.position.set(-4, -4, -12).normalize();
     scene.add(light);
     return scene;
-}
+};
 
 var _populateSimpleScene = function (scene, coords){
 
@@ -60,7 +60,7 @@ var _populateSimpleScene = function (scene, coords){
     scene.add(group);
 
     return scene;
-}
+};
 
 var _getCamera = function () {
     const fov = 45;
@@ -69,20 +69,20 @@ var _getCamera = function () {
     const far = 1000;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     // const camera = new THREE.OrthographicCamera(-5, 5, -5, 5, -100, 100)
-    camera.position.set(4, 4, 12)
+    camera.position.set(4, 4, 12);
     // camera.rotation.y=10/180 * Math.PI;
     // camera.lookAt(new THREE.Vector3(5, 5, 0));
     // controls.target = (new THREE.Vector3(5, 5, 0));
     return camera;
-}
+};
 
 var _getRaycaster = function() {
     return new THREE.Raycaster();
-}
+};
 
 var _getControls = function(camera, domElement) {
     return new OrbitControls(camera, domElement);
-}
+};
 
 var makeCanvas = function (width, height, attach) {
     var canvas = document.createElement("canvas");
@@ -92,14 +92,14 @@ var makeCanvas = function (width, height, attach) {
         document.body.appendChild(canvas);
     }
     return canvas;
-}
+};
 
 var addDisplay = function (entity) {
     var className = entity.constructor.name;
     var displayConstructor = display[className];
     if (displayConstructor == undefined) { return undefined; }
     else { return new displayConstructor(entity); }
-}
+};
 
 var tryAttachDisplay = function (entity) { 
     if (entity.display != undefined) { return; }
@@ -107,7 +107,7 @@ var tryAttachDisplay = function (entity) {
         var display = addDisplay(entity);
         entity.display = display;
     }
-}
+};
 
 function onWindowResize() {
     camera.aspect = WIDTH / HEIGHT;
@@ -127,12 +127,12 @@ function onDocumentMouseClick(event) {
 var glanimate = function() {
     requestAnimationFrame(glanimate);
     render();
-}
+};
 
 function mouseRaycast(mouse, camera, scene) {
     // find intersections
     raycaster.setFromCamera(mouse, camera);
-    var group = utilities.getGroup(scene)
+    var group = utilities.getGroup(scene);
     var intersects = raycaster.intersectObjects(group.children);
     if (intersects.length > 0) {
         if (INTERSECTED != intersects[0].object) {
@@ -164,7 +164,7 @@ function render() {
 
 var glinit = function (canvas) {
     // Rendering Canvas
-    renderCanvas = canvas
+    renderCanvas = canvas;
     renderContext = renderCanvas.getContext("webgl");
 
     // Camera and Scene
@@ -183,14 +183,14 @@ var glinit = function (canvas) {
     // context.canvas.onmousemove = (event) => onDocumentMouseMove(event);
     // context.canvas.onclick = (event) => onDocumentMouseClick(event);
     window.addEventListener('resize', onWindowResize, false);
-}
+};
 
 var rebuild_scene = function(renderContext){
     scene = renderContext.scene;
     utilities.clear(renderContext);
     scene = _populateSimpleScene(scene, _getCoords());
     renderContext.scene = scene;
-}
+};
 
 var redraw = function (context, state, triggerList, size) {
     let space = state.space;
@@ -254,7 +254,7 @@ var redraw = function (context, state, triggerList, size) {
     }
     showSpace(space);
     showInputStack(stack);
-}
+};
 
 
 var addListeners = function (context, triggerList) { // Add Listeners
@@ -262,18 +262,18 @@ var addListeners = function (context, triggerList) { // Add Listeners
         // console.log(INTERSECTED);
         event.obj = INTERSECTED.obj;
         triggerList.forEach(t => t(event));
-    }
+    };
     context.canvas.onclick = function (event) {
         console.log("Interesected", INTERSECTED, INTERSECTED.obj);
         event.obj = INTERSECTED.obj;
         triggerList.forEach(t => t(event));
-    }
-}
+    };
+};
 
 
 // Very detached from draw/display. Fits Controller.
 var checkConfirmation = function (state, timelineView) {
-    let space = state.space
+    let space = state.space;
     let stack = state.stack;
     let digestFnGetter = state.digestFnGetter;
     let topSel = stack[stack.length - 1].getNext(space);
@@ -295,7 +295,7 @@ var checkConfirmation = function (state, timelineView) {
         return true;
     }
     return false;
-}
+};
 
 // Very detacted from draw/display. Fits Controller.
 var execute = function (effects, space) { // Clarify as "requestExecution"
@@ -308,16 +308,16 @@ var execute = function (effects, space) { // Clarify as "requestExecution"
                     clearTimeout(executeAndAnimate);
                     resolve(result);
                     console.log("PROMISED: ", duration, effect);
-                }, duration)
-            })
+                }, duration);
+            });
             return effectPromise;
-        }
-    }
+        };
+    };
 
     var executionPromise = effects.reduce((prev, cur) => prev.then(effectToPromise(cur)), Promise.resolve());
     //executionPromise.then();
     return effects;
-}
+};
 
 
 module.exports = {
@@ -327,4 +327,4 @@ module.exports = {
     makeCanvas: makeCanvas,
     glinit: glinit, // TODO: Remove
     glanimate: glanimate, //TODO: Remove
-}
+};

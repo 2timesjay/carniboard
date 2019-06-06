@@ -72,7 +72,7 @@ class AbstractDisplay {
                     return false;
                 }
             }
-        }
+        };
         return trigger;
     }
 
@@ -91,7 +91,7 @@ class AbstractDisplay {
                     return false;
                 }
             }
-        }
+        };
         return trigger;
     }
 
@@ -160,7 +160,7 @@ class UnitDisplay extends AbstractDisplay {
             return this.xOffsetCurrent;
         }
         else {
-            this.xOffsetCurrent = next.value
+            this.xOffsetCurrent = next.value;
             return this.xOffsetCurrent;
         }
     }
@@ -180,7 +180,7 @@ class UnitDisplay extends AbstractDisplay {
             return this.yOffsetCurrent;
         }
         else {
-            this.yOffsetCurrent = next.value
+            this.yOffsetCurrent = next.value;
             return this.yOffsetCurrent;
         }
     }
@@ -213,7 +213,7 @@ class ActionDisplay extends AbstractDisplay {
     constructor(action) {
         super(action);
         this.action = action;
-        this.size = size * 0.8
+        this.size = size * 0.8;
     }
 
     get xOffset() {
@@ -250,7 +250,7 @@ class PathDisplay extends AbstractDisplay {
         this.path = path;
         this.preview = false;
         this.select = false;
-        this.size = size
+        this.size = size;
     }
 
     basicDisplay(context) {
@@ -266,7 +266,7 @@ class PathDisplay extends AbstractDisplay {
    }
 
     previewDisplay(context) {
-        let locations = [this.path.origin].concat(this.path.locations)
+        let locations = [this.path.origin].concat(this.path.locations);
         let self = this;
         locations.forEach(function (loc, i) {
             if (i > 0) {
@@ -293,7 +293,7 @@ class PathDisplay extends AbstractDisplay {
     }
 
     selectDisplay(context) {
-        let locations = [this.path.origin].concat(this.path.locations)
+        let locations = [this.path.origin].concat(this.path.locations);
         let self = this;
         locations.forEach(function (loc, i) {
             if (i > 0) {
@@ -364,4 +364,4 @@ module.exports = {
     AttackAction: ActionDisplay,
     ReadyCounterAction: ActionDisplay,
     Confirmation: ConfirmationDisplay
-}
+};
