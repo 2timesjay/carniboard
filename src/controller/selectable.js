@@ -27,10 +27,11 @@ class TreeSelectable extends Selectable {
      * On initial select, shows top-priority path for each group.
      * On subsequent selections, return TreeSelectable with end of those paths as root.
      */
-    constructor(entity, isConfirmable, groupByFn, priorityFn) {
+    constructor(entity, isConfirmable, history, groupByFn, priorityFn) {
         super(entity, isConfirmable);
         this.groupByFn = groupByFn;
         this.priorityFn = priorityFn;
+        this.history = history;
     }
 
     _getAllPaths() {
@@ -72,8 +73,22 @@ class TreeSelectable extends Selectable {
         this.next = _getAllPaths().values;
     }
 
+    getNext(input) { // TODO: this is kind of ill-defined. Why does this take input when all other getNexts don't?
+        let newRoot = input;
+        return new TreeSelectable(newRoot, True, input, this.groupByFn, this.priorityFn);
+    }
+}
+
+class CheckersMoveSelectable extends TreeSelectable {
+    constructor(entity, isConfirmable, history) {
+        let groupByFn = edgeList => edgeList[edgeList.length - 1].to;
+        let priorityFn = edgeList => -1 * edgeList.length;
+        super(entity, isConfirmable, history, groupByFn, priorityFn);
+    }
+
     getNext(input) { 
-        return new TreeSelectable(input, True, this.groupByFn, this.priorityFn);
+        let newRoot = input;
+        return new CheckersMoveSelectable(newRoot, True, input);
     }
 }
 

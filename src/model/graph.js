@@ -61,6 +61,10 @@ class Edge extends AbstractEntity {
         this.from = from;
         this.to = to;
     }
+
+    isTraversable() {
+        return this.from.isTraversable && this.to.isTraversable;
+    }
 }
 
 class CheckersEdge extends Edge {
@@ -71,6 +75,13 @@ class CheckersEdge extends Edge {
         let isJump = ((Math.abs(subCo(to, from).get(1)) == 2) && 
                       (Math.abs(subCo(to, from).get(0)) == 2));
         this.jumped = isJump ? jumpedCo(to, from) : null;
+    }
+
+    isTraversable(prevEdgeList) {
+        self = this;
+        let noPrevNonJumps = prevEdgeList.every(edge => edge.jumped !== null);
+        let noDuplicateJumps = prevEdgeList.every(edge => edge.jumped != self.jumped);
+        return noPrevNonJumps && noDuplicateJumps;
     }
 }
 
