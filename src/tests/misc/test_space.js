@@ -1,7 +1,7 @@
 var test = require('tape');
-var Location = require('../model/entity').Location;
-var Unit = require('../model/entity').Unit;
-var Space = require('../model/space').Space;
+var Location = require('../../model/entity').Location;
+var Unit = require('../../model/entity').Unit;
+var Space = require('../../model/space').Space;
 
 locations = [
     [1, 0, 1, 1, 1, 0],

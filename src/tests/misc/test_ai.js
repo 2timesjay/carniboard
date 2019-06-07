@@ -1,8 +1,8 @@
 var test = require('tape');
 
-makeBasicTactics = require('../model/construction').makeBasicTactics;
-makeTicTacToe = require('../model/construction').makeTicTacToe;
-ai = require('../model/ai');
+makeBasicTactics = require('../../model/construction').makeBasicTactics;
+makeTicTacToe = require('../../model/construction').makeTicTacToe;
+ai = require('../../model/ai');
 generateAllSelections = ai.generateAllSelections;
 
 /* Basic Tactics specific setup */

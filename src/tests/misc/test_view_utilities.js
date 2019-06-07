@@ -1,5 +1,5 @@
 var test = require('tape');
-utilities = require("../view/utilities");
+utilities = require("../../view/utilities");
 lerp = utilities.lerp;
 
 test('lerp', function (t) {
