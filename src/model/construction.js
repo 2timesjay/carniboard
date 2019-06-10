@@ -1,21 +1,21 @@
-utilities = require("../utilities/utilities")
+utilities = require("../utilities/utilities");
 intersection = utilities.intersection;
 
-entity = require('./entity')
-Unit = entity.Unit
-CheckerPiece = entity.CheckerPiece
-Location = entity.Location
-TicTacToeControlQueue = entity.TicTacToeControlQueue
-ConnectFourControlQueue = entity.ConnectFourControlQueue
-BasicTacticsControlQueue = entity.BasicTacticsControlQueue
-Confirmation = entity.Confirmation
+entity = require('./entity');
+Unit = entity.Unit;
+CheckerPiece = entity.CheckerPiece;
+Location = entity.Location;
+TicTacToeControlQueue = entity.TicTacToeControlQueue;
+ConnectFourControlQueue = entity.ConnectFourControlQueue;
+BasicTacticsControlQueue = entity.BasicTacticsControlQueue;
+Confirmation = entity.Confirmation;
 
-effect = require('./effect')
-AddUnitEffect = effect.AddUnitEffect
-EndTurnEffect = effect.EndTurnEffect
+effect = require('./effect');
+AddUnitEffect = effect.AddUnitEffect;
+EndTurnEffect = effect.EndTurnEffect;
 
-Space = require('./space').Space
-State = require('./state').State
+Space = require('./space').Space;
+State = require('./state').State;
 
 makeTicTacToe = function () {
     let locations = [
@@ -41,8 +41,8 @@ makeTicTacToe = function () {
         }
         function diag(units) {
             let hashes = units.map(u => u.loc.y * 3 + u.loc.x);
-            return ((hashes.indexOf(0) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(8) >= 0)
-                || (hashes.indexOf(2) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(6) >= 0))
+            return ((hashes.indexOf(0) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(8) >= 0) || 
+                    (hashes.indexOf(2) >= 0 && hashes.indexOf(4) >= 0 && hashes.indexOf(6) >= 0));
         }
         return udlr(xs) || udlr(ys) || diag(team);
     }
@@ -62,7 +62,7 @@ makeTicTacToe = function () {
             let location = stk[1];
             return [new AddUnitEffect(location), new EndTurnEffect()];
         }; // TODO: Add unit
-    }
+    };
     scoreFn = function (state) {
         let spc = state.space;
         let curTeam = spc.units.filter(u => u.team == state.team);
@@ -70,11 +70,11 @@ makeTicTacToe = function () {
         if (threeInARow(curTeam)) { return 1;}
         else if (threeInARow(otherTeam)) {return -1;}
         else { return 0; }
-    }
+    };
     stack = [new TicTacToeControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter, scoreFn);
     return state;
-}
+};
 
 makeConnectFour = function () {
     let locations = [
@@ -101,40 +101,40 @@ makeConnectFour = function () {
             if (u.loc.x >= 4) {
                 return false;
             }
-            let curHash = hash(u)
+            let curHash = hash(u);
             let partial = intersection(
                 new Set([curHash, curHash + 1, curHash + 2, curHash + 3]),
-                hashes)
+                hashes);
             return partial.size == 4;
         }
         function vertical(u) {
             if (u.loc.y >= 3) {
                 return false;
             }
-            let curHash = hash(u)
+            let curHash = hash(u);
             let partial = intersection(
                 new Set([curHash, curHash + 7, curHash + 14, curHash + 21]),
-                hashes)
+                hashes);
             return partial.size == 4;
         }
         function diagDown(u) {
             if (u.loc.y >= 3 || u.loc.x >= 4) {
                 return false;
             }
-            let curHash = hash(u)
+            let curHash = hash(u);
             let partial = intersection(
                 new Set([curHash, curHash + 8, curHash + 16, curHash + 24]),
-                hashes)
+                hashes);
             return partial.size == 4;
         }
         function diagUp(u) {
             if (u.loc.y >= 3 || u.loc.x < 3) {
                 return false;
             }
-            let curHash = hash(u)
+            let curHash = hash(u);
             let partial = intersection(
                 new Set([curHash, curHash + 6, curHash + 12, curHash + 18]),
-                hashes)
+                hashes);
             return partial.size == 4;
         }
         return team.some(u => horizontal(u) || vertical(u) || diagDown(u) || diagUp(u));
@@ -175,7 +175,7 @@ makeConnectFour = function () {
             let drop_loc = drop(location);
             return [new AddUnitEffect(drop_loc), new EndTurnEffect()];
         }; // TODO: Add unit
-    }
+    };
 
     scoreFn = function (state) {
         let spc = state.space;
@@ -184,12 +184,12 @@ makeConnectFour = function () {
         if (fourInARow(curTeam)) { return 1; }
         else if (fourInARow(otherTeam)) { return -1; }
         else { return 0; }
-    }
+    };
 
     stack = [new ConnectFourControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
     return state;
-}
+};
 
 makeBasicTactics = function() {
     let locations = [
@@ -224,7 +224,7 @@ makeBasicTactics = function() {
             return [new Confirmation(undefined, "GAME OVER", true)];
         } else {
             return [];
-        };
+        }
     };
     digestFnGetter = function (stack) { // stack => (stack => Effect[])
         let action = stack[2];
@@ -238,11 +238,11 @@ makeBasicTactics = function() {
         if (teamDead(otherTeam)) { return 1; }
         else if (teamDead(curTeam)) { return -1; }
         else { return 0; }
-    }
+    };
     stack = [new BasicTacticsControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
     return state;
-}
+};
 
 makeCheckers = function () {
     let locations = [
@@ -289,7 +289,7 @@ makeCheckers = function () {
             return [new Confirmation(undefined, "GAME OVER", true)];
         } else {
             return [];
-        };
+        }
     };
 
     digestFnGetter = function (stack) { // stack => (stack => Effect[])
@@ -313,11 +313,11 @@ makeCheckers = function () {
     stack = [new BasicTacticsControlQueue()];
     state = new State(space, stack, gameEndConfirmation, digestFnGetter);
     return state;
-}
+};
 
 module.exports = {
     makeTicTacToe: makeTicTacToe,
     makeConnectFour: makeConnectFour,
     makeBasicTactics: makeBasicTactics,
     makeCheckers: makeCheckers
-}
+};
