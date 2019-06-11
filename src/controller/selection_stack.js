@@ -13,7 +13,7 @@ class SelectionStack {
 
     getNext() /* : Selectable[] */ {
         // Get list of selectables representing next options.
-        return this.peek().getNext(); 
+        return this.peek().getNext(this); 
     }
     
     choose(selection /* : Selectable */) { 

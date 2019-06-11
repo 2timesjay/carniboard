@@ -9,15 +9,15 @@ class Selectable {
         this.label = this.entity.constructor.name;
     }
 
-    getNext(input) { 
+    getNext(stack) { 
         if (this.next == undefined){
-            this._calculateNext();
+            this._calculateNext(stack);
         }
         return this.next;
     }
 
-    _calculateNext() {
-        this.next = [];
+    _calculateNext(stack) {
+        this.next = this.entity.getNext(stack);
     }
 }
 
@@ -70,12 +70,12 @@ class TreeSelectable extends Selectable {
         return pathsByGroup;
     }
 
-    _calculateNext() {
+    _calculateNext(stack) {
         this.next = _getAllPaths().values;
     }
 
-    getNext(input) { // TODO: this is kind of ill-defined. Why does this take input when all other getNexts don't?
-        let newRoot = input;
+    getNext(stack) { // TODO: this is kind of ill-defined. Why does this take input when all other getNexts don't?
+        let newRoot = stack.peek().entity;
         return new TreeSelectable(newRoot, True, input, this.groupByFn, this.priorityFn);
     }
 }

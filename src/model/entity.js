@@ -129,6 +129,7 @@ class BaseUnit extends AbstractEntity { // isa Entity
 class BasePiece extends AbstractEntity { // isa Entity
     constructor(team, loc) {
         super();
+        this.team = team;
         this.loc = loc;
         this.actionClasses = [];
     }
@@ -146,6 +147,10 @@ class BasePiece extends AbstractEntity { // isa Entity
         hash = hashIncr(this.loc.hash());
         hash = hashIncr(this.team);
         return hash;
+    }
+
+    isAlive() {
+        return this.loc != null;
     }
 }
 
@@ -431,7 +436,23 @@ class CheckersControlQueue extends BaseControlQueue {
     }
 
     incrementQueue(stack) {
-        return stack.state.units.filter(u => u.team == sp.state.team);
+        let state = stack.state;
+        return state.units.filter(u => u.team == state.team);
+    }
+
+    checkEnd(stack) {
+        let state = stack.state;
+        let end = state.gameEndFn(stack);
+        if (end.length > 0) { console.log("GAME OVER"); return end; }
+        else { return undefined; }
+    }
+
+    getNext(stack) {
+        return this.checkEnd(stack) || this.incrementQueue(stack);
+    }
+
+    clone() {
+        return new this.constructor();
     }
 }
 
