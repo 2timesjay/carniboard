@@ -6,6 +6,7 @@ class Selectable {
         this.entity = entity;
         this.next = undefined;
         this.isConfirmable = isConfirmable;
+        this.label = this.entity.constructor.name;
     }
 
     getNext(input) { 

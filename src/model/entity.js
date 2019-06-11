@@ -27,9 +27,9 @@ class AbstractEntity {
     constructor() {
     }
 
-    getNext(sp) { 
+    getNext(stack) { 
         if (this.next == undefined){
-            this._calculateNext(sp);
+            this._calculateNext(stack);
         }
         return this.next;
     }
@@ -80,7 +80,7 @@ class Confirmation { // TODO: Make entity?
         this.isEnd = isEnd || false;
     }
 
-    getNext(sp) {
+    getNext(stack) {
         return [];
     }
 }
@@ -126,9 +126,34 @@ class BaseUnit extends AbstractEntity { // isa Entity
     }
 }
 
-class CheckerPiece extends BaseUnit { // isa Entity
-    constructor(name, loc, team, stats) {
-        super(stats || {}, name, loc, team, [CheckersMoveAction]);
+class BasePiece extends AbstractEntity { // isa Entity
+    constructor(team, loc) {
+        super();
+        this.loc = loc;
+        this.actionClasses = [];
+    }
+
+    _calculateNext(stack) {
+        if (this.isAlive()) {
+            this.next = this.actionClasses.map((a, i) => new a(i, this));
+        } else {
+            this.next = [];
+        }
+    }
+
+    hash() {
+        let hash = super.hash();
+        hash = hashIncr(this.loc.hash());
+        hash = hashIncr(this.team);
+        return hash;
+    }
+}
+
+class CheckersPiece extends BasePiece { // isa Entity
+    constructor(team, loc, isKing) {
+        super(team, loc);
+        this.actionClasses = [CheckersMoveAction];
+        this.isKing = isKing;
     }
 }
 
@@ -371,8 +396,8 @@ class BaseControlQueue extends AbstractEntity {
         return [];
     }
 
-    getNext(sp) {
-        return this.checkEnd(sp) || this.incrementQueue(sp);
+    getNext(stack) {
+        return this.checkEnd(stack) || this.incrementQueue(stack);
     }
 
     clone() {
@@ -405,8 +430,8 @@ class CheckersControlQueue extends BaseControlQueue {
         super();
     }
 
-    incrementQueue(sp) {
-        return sp.units.filter(u => u.team == sp.state.team);
+    incrementQueue(stack) {
+        return stack.state.units.filter(u => u.team == sp.state.team);
     }
 }
 
@@ -424,7 +449,7 @@ class BasicTacticsControlQueue extends BaseControlQueue {
 module.exports = {
     AbstractEntity: AbstractEntity,
     Unit: Unit,
-    CheckerPiece: CheckerPiece,
+    CheckersPiece: CheckersPiece,
     Location: Location,
     CheckersControlQueue: CheckersControlQueue,
     TicTacToeControlQueue: TicTacToeControlQueue,

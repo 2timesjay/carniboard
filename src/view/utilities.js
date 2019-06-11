@@ -14,7 +14,7 @@ var lerp = function*(rate, current, target, minTime) {
     while (new Date().getTime() - initialTime < minTime) {
         yield target;
     }
-}
+};
 
 var animate = function(effects) {
     moves = effects.filter(e => e.constructor.name == "MoveEffect");
@@ -23,13 +23,13 @@ var animate = function(effects) {
     zipped = origins.map((v, i) => ({ o: v, d: dests[i] }));
     let rate = 100;
     return chain(...zipped.map(z => lerp(rate, z.o, z.d)));
-}
+};
 
 var chain = function*(...gens) {
     for (let g of gens) {
         yield *g;
     }
-}
+};
 
 // var makeCanvas = function (width, height, attach) {
 //     var canvas = document.createElement("canvas");
@@ -93,4 +93,4 @@ module.exports = {
     getMousePos: getMousePos,
     makeRect: makeRect,
     makeCircle: makeCircle
-}
+};

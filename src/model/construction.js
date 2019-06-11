@@ -3,11 +3,12 @@ intersection = utilities.intersection;
 
 entity = require('./entity');
 Unit = entity.Unit;
-CheckerPiece = entity.CheckerPiece;
+CheckersPiece = entity.CheckersPiece;
 Location = entity.Location;
 TicTacToeControlQueue = entity.TicTacToeControlQueue;
 ConnectFourControlQueue = entity.ConnectFourControlQueue;
 BasicTacticsControlQueue = entity.BasicTacticsControlQueue;
+CheckersControlQueue = entity.CheckersControlQueue;
 Confirmation = entity.Confirmation;
 
 effect = require('./effect');
@@ -16,6 +17,11 @@ EndTurnEffect = effect.EndTurnEffect;
 
 Space = require('./space').Space;
 State = require('./state').State;
+GameState = require('./state').GameState;
+
+CheckersGraph = require('./graph').CheckersGraph;
+co = require('./graph').co;
+SelectionStack = require('../controller/selection_stack').SelectionStack;
 
 makeTicTacToe = function () {
     let locations = [
@@ -274,7 +280,7 @@ makeCheckers = function () {
             'name': 'black2',
             'team': 1
         }
-    ].map(u => new CheckerPiece(u.name, locations[u.loc[1]][u.loc[0]], u.team));
+    ].map(u => new CheckersPiece(u.name, locations[u.loc[1]][u.loc[0]], u.team));
     
     let space = new Space(locations, units, 8);
     let teamDead = function (team) {
@@ -311,13 +317,70 @@ makeCheckers = function () {
     };
     
     stack = [new BasicTacticsControlQueue()];
-    state = new State(space, stack, gameEndConfirmation, digestFnGetter);
+    state = new State(space, stack, gameEndConfirmation, digestFnGetter, scoreFn);
     return state;
 };
+
+makeCheckersWithGraph = function() {
+    teamDead = function (team) {
+        let aliveUnits = team.filter(u => u.isAlive());
+        return aliveUnits.length == 0;
+    };
+
+    gameEndConfirmation = function (stack) {
+        let state = stack.state;
+        let t0 = state.units.filter(u => u.team == 0);
+        let t1 = state.units.filter(u => u.team == 1);
+        if (teamDead(t0) || teamDead(t1)) {
+            return [new Confirmation(undefined, "GAME OVER", true)];
+        } else {
+            return [];
+        }
+    };
+
+    digestFnGetter = function (stack) { // stack => (stack => Effect[])
+        let action = stack.getMap().get("CheckersMoveAction");
+        return action.digestFn;
+    };
+
+    scoreFn = function (stack) {
+        let state = stack.state;
+        let curTeam = state.units.filter(u => u.team == state.team);
+        let otherTeam = state.units.filter(u => u.team == 1 - state.team);
+        if (teamDead(otherTeam)) {
+            return 1;
+        } else if (teamDead(curTeam)) {
+            return -1;
+        } else {
+            return 0;
+        }
+    };
+
+    let space = new CheckersGraph();
+    let pieces = [];
+    TEAMS = [0, 1];
+    for(let team of TEAMS){
+        for (let i = 0; i < 8; i++){
+            let col = i;
+            let row = team*6 + ((i+1)%2);
+            let coord = co(col, row, 0);
+            let loc = space.nodeMap[coord];
+            let piece = new CheckersPiece(team, loc, false); // TODO: Loc can be set on add.
+            pieces.push(piece);
+            space.addUnit(piece, coord);
+        }
+    }
+    
+    let state = new GameState(space, pieces, gameEndConfirmation, digestFnGetter, scoreFn);
+    let stack = state.initializeStack([new CheckersControlQueue(state)]);
+    return stack;
+};
+
 
 module.exports = {
     makeTicTacToe: makeTicTacToe,
     makeConnectFour: makeConnectFour,
     makeBasicTactics: makeBasicTactics,
-    makeCheckers: makeCheckers
+    makeCheckers: makeCheckers,
+    makeCheckersWithGraph: makeCheckersWithGraph
 };

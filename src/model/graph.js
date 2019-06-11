@@ -44,10 +44,35 @@ class LocationNode extends AbstractEntity {
         this.isTraversable = isTraversable;
         this.inEdges = [];
         this.outEdges = [];
+        this.units = [];
     }
 
     getNeighbors() {
         return this.outEdges.map(edge => edge.to);
+    }
+
+    addUnit(u){
+        if (!this.containsUnit(u)) {
+            this.units.push(u);
+        }
+    }
+
+    removeUnit(u) {
+        if (this.containsUnit(u)) {
+            let removed = this.units.splice(this.units.indexOf(u))[0];
+            return removed;
+        } else {
+            return null;
+        }
+    }
+
+    clearUnits(u) {
+        let cleared = this.units.splice(0);
+        return cleared;
+    }
+
+    containsUnit(u) {
+        return this.units.indexOf(u) != -1;
     }
 
     clone() {
@@ -62,25 +87,33 @@ class Edge extends AbstractEntity {
         this.to = to;
     }
 
-    isTraversable() {
+    isTraversable(stack) {
         return this.from.isTraversable && this.to.isTraversable;
+    }
+
+    getNext(stack) {
+        
+    }
+
+    _calculateNext(stack) {
+        return this.to.outEdges.filter(edge => edge.isTraversable(stack));
     }
 }
 
 class CheckersEdge extends Edge {
     constructor(from, to) {
         super(from, to);
-        // If moving up the board, direction +1. Down the board, -1.
-        this.direction = subCo(to, from).get(1) > 0 ? 1 : -1;
-        let isJump = ((Math.abs(subCo(to, from).get(1)) == 2) && 
-                      (Math.abs(subCo(to, from).get(0)) == 2));
+        this.delta = subCo(to, from);
+        let isJump = ((Math.abs(this.delta.get(1)) == 2) && 
+                      (Math.abs(this.delta.get(0)) == 2));
         this.jumped = isJump ? jumpedCo(to, from) : null;
     }
 
-    isTraversable(prevEdgeList) {
-        self = this;
+    isTraversable(stack) {
+        prevEdgeList = stack.path;
         let noPrevNonJumps = prevEdgeList.every(edge => edge.jumped !== null);
         let noDuplicateJumps = prevEdgeList.every(edge => edge.jumped != self.jumped);
+        // let mustJumpEnemies = self.jumped
         return noPrevNonJumps && noDuplicateJumps;
     }
 }
@@ -106,11 +139,23 @@ class Graph extends AbstractEntity {
     }
     
     constructEdge(from, to) {
-        return new CheckersEdge(from, to);
+        return new Edge(from, to);
     }
 
     edgeCount() {
         return this.nodeList.map(n => n.outEdges.length).reduce((a, b) => a + b);
+    }
+
+    addUnit(u, coord) {
+        let loc = this.nodeMap[coord];
+        loc.addUnit(u);
+        u.loc = loc;
+    }
+
+    removeUnitAtCoord(coord) {
+        let loc = this.nodeMap[coord];
+        let cleared = loc.clearUnits();
+        cleared.forEach(u => u.loc = null);
     }
 }
 
@@ -118,7 +163,6 @@ class GridGraph extends Graph {
     constructor(size, nh) {
         super([]);
         this.size = size;
-        let gridNodeList = [];
         for (var i = 0; i < size; i += 1) {
             for(var j = 0; j < size; j += 1) {
                 let gridLoc = new LocationNode(co(i, j, 0), co(0, 0, 1), true);

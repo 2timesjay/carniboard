@@ -1,6 +1,9 @@
+Selectable = require("./selectable").Selectable;
+
 class SelectionStack {
-    constructor(stack /* : Selectable[] */) { 
-        this._stack = stack;
+    constructor(entity_list, state /* : Selectable[] */) { 
+        this._stack = entity_list.map(ent => new Selectable(ent, true));
+        this.state = state;
     }
 
     peek() /* : Selectable */ {
