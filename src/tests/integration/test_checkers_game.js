@@ -36,8 +36,17 @@ test('testPlayCheckers', function (t) {
     let state = stack.state;
     let space = state.space;
     
-    t.plan(1);
+    t.plan(3);
 
     let unitOptions = stack.getNext();
-    t.equals(unitOptions.length, 8);
+    t.equals(unitOptions.length, 8, "8 available units to pick");
+    t.assert(unitOptions[0].loc.coord.equals(co(0, 1, 0)), "First Piece at col 0, row 1");
+
+    stack.choose(unitOptions[0]);
+
+    let actionOptions = stack.getNext();
+    t.assert(
+        actionOptions[0] instanceof CheckersMoveAction, 
+        "Stack top is instance of CheckersMoveAction"
+    );
 });
